@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Weekly Planning</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --accent-dim: #1a2a4a;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --purple: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .header-right {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* CONTROLS */
+  .controls {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .control-group label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .control-group select,
+  .control-group input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .control-group select:focus,
+  .control-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .generate-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .generate-btn:hover { opacity: 0.85; }
+  .generate-btn:active { transform: scale(0.98); }
+
+  /* MAIN CONTENT */
+  .main { padding: 32px; max-width: 1100px; }
+
+  .week-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .week-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .week-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom: 40px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* PROJECT CARDS */
+  .project-grid { display: grid; gap: 8px; }
+
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    transition: border-color 0.2s;
+  }
+
+  .project-card:hover { border-color: var(--border-light); }
+
+  .project-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .project-dep {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .project-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .status-done { background: var(--green-dim); color: var(--green); }
+  .status-progress { background: var(--accent-dim); color: var(--accent); }
+  .status-not-started { background: var(--border); color: var(--text-muted); }
+  .status-at-risk { background: var(--red-dim); color: var(--red); }
+
+  .workstream-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* MILESTONE CARDS */
+  .milestone-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .milestone-name {
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .milestone-name.design-freeze { color: var(--accent); }
+
+  .days-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .days-soon { background: var(--amber-dim); color: var(--amber); }
+  .days-upcoming { background: var(--accent-dim); color: var(--accent); }
+  .days-past { background: var(--green-dim); color: var(--green); }
+
+  /* AGENDA SECTION */
+  .agenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .agenda-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .agenda-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+
+  .agenda-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .agenda-item:last-child { border-bottom: none; }
+
+  .agenda-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    padding-top: 2px;
+    min-width: 18px;
+  }
+
+  .notes-area {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    resize: none;
+    outline: none;
+    line-height: 1.8;
+    min-height: 120px;
+  }
+
+  .notes-area::placeholder { color: var(--text-dim); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* PRINT */
+  .print-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .no-content { display: none; }
+
+  @media print {
+    body { background: white; color: black; }
+    .controls, .header, .print-btn, .generate-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Weekly Planning</div>
+  <div class="header-right" id="current-date"></div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Week Starting (Monday)</label>
+    <input type="date" id="week-date" />
+  </div>
+  <div class="control-group">
+    <label>Workstream Filter</label>
+    <select id="workstream-filter">
+      <option value="all">All Workstreams</option>
+      <option value="Mechanical">Mechanical</option>
+      <option value="Systems Software & Electronics">Systems Software & Electronics</option>
+      <option value="Manufacturing">Manufacturing</option>
+      <option value="Biology & Chemistry">Biology & Chemistry</option>
+      <option value="Regulatory & Quality">Regulatory & Quality</option>
+      <option value="Clinical">Clinical</option>
+    </select>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="generate-btn" onclick="generateMeeting()">Generate Agenda</button>
+    <button class="print-btn" onclick="window.print()">Export</button>
+  </div>
+</div>
+
+<div class="main" id="output">
+  <div class="empty-state">
+    ↑ Select a week and workstream to generate your planning agenda
+  </div>
+</div>
+
+<script>
+const PROJECTS = [
+  { name: "DFM Review - Enclosure with CM", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-01-06", end: "2025-02-07", status: "Done", dependsOn: [] },
+  { name: "Thermal Management Validation", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-01-06", end: "2025-02-21", status: "Done", dependsOn: ["DFM Review - Enclosure with CM"] },
+  { name: "Final Enclosure Geometry Lock", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-02-10", end: "2025-03-07", status: "Done", dependsOn: ["DFM Review - Enclosure with CM"] },
+  { name: "IP67 Ingress Protection Testing", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-03-10", end: "2025-03-28", status: "Done", dependsOn: ["Final Enclosure Geometry Lock"] },
+  { name: "Mechanical Durability & Drop Testing", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-03-10", end: "2025-03-28", status: "Done", dependsOn: ["Final Enclosure Geometry Lock"] },
+  { name: "Biocompatibility Testing (ISO 10993)", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-02-10", end: "2025-04-11", status: "Done", dependsOn: ["DFM Review - Enclosure with CM"] },
+  { name: "Adhesion Patch & Wearability Validation", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-03-10", end: "2025-04-25", status: "Done", dependsOn: ["Final Enclosure Geometry Lock"] },
+  { name: "Tooling Design & Release to Manufacturer", workstream: "Mechanical", lead: "Head of Mechanical", start: "2025-04-28", end: "2025-05-30", status: "Done", dependsOn: ["Final Enclosure Geometry Lock", "IP67 Ingress Protection Testing", "Mechanical Durability & Drop Testing", "Biocompatibility Testing (ISO 10993)", "Adhesion Patch & Wearability Validation"] },
+  { name: "Component Lead Time & Supply Chain Risk Review", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-01-06", end: "2025-02-07", status: "Done", dependsOn: [] },
+  { name: "Safety Stock Policy Implementation", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-02-10", end: "2025-02-21", status: "Done", dependsOn: ["Component Lead Time & Supply Chain Risk Review"] },
+  { name: "CM Supplier Qualification Audit", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-02-10", end: "2025-03-07", status: "Done", dependsOn: [] },
+  { name: "Yield Improvement DOE", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-02-24", end: "2025-03-28", status: "Done", dependsOn: ["CM Supplier Qualification Audit"] },
+  { name: "Sensor Membrane Deposition Process Optimisation", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-01-06", end: "2025-03-28", status: "Done", dependsOn: ["Yield Improvement DOE"] },
+  { name: "Assembly Process Documentation & SOPs", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-03-31", end: "2025-04-25", status: "Done", dependsOn: ["Sensor Membrane Deposition Process Optimisation"] },
+  { name: "Equipment Qualification (IQ/OQ)", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-04-28", end: "2025-05-16", status: "Done", dependsOn: ["Sensor Membrane Deposition Process Optimisation", "Assembly Process Documentation & SOPs"] },
+  { name: "Pilot Build #3 - 30 Unit Build", workstream: "Manufacturing", lead: "Head of Manufacturing", start: "2025-05-19", end: "2025-06-06", status: "Done", dependsOn: ["Equipment Qualification (IQ/OQ)", "Assembly Process Documentation & SOPs", "Sensor Membrane Deposition Process Optimisation"] },
+  { name: "Power Consumption Optimisation", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-01-06", end: "2025-02-14", status: "Done", dependsOn: [] },
+  { name: "App-Firmware Interface Specification Lock", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-01-06", end: "2025-02-07", status: "Done", dependsOn: [] },
+  { name: "BLE Stack Stability Resolution", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-01-06", end: "2025-02-14", status: "Done", dependsOn: [] },
+  { name: "PCB Layout Finalisation & Gerber Release", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-02-17", end: "2025-03-14", status: "Done", dependsOn: ["Power Consumption Optimisation", "BLE Stack Stability Resolution"] },
+  { name: "BLE Antenna Placement & Performance Validation", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-03-17", end: "2025-04-04", status: "Done", dependsOn: ["PCB Layout Finalisation & Gerber Release"] },
+  { name: "PCB Supplier Qualification", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-03-17", end: "2025-04-11", status: "Done", dependsOn: ["PCB Layout Finalisation & Gerber Release"] },
+  { name: "iOS & Android App Feature Completion", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-01-06", end: "2025-02-28", status: "Done", dependsOn: ["App-Firmware Interface Specification Lock"] },
+  { name: "App Regression Test Suite Completion", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-03-03", end: "2025-03-21", status: "Done", dependsOn: ["iOS & Android App Feature Completion", "BLE Stack Stability Resolution"] },
+  { name: "Embedded Glucose Algorithm Finalisation", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-03-17", end: "2025-04-25", status: "Done", dependsOn: ["BLE Antenna Placement & Performance Validation", "PCB Layout Finalisation & Gerber Release"] },
+  { name: "App Usability Study (Formative)", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-03-24", end: "2025-04-11", status: "Done", dependsOn: ["App Regression Test Suite Completion", "iOS & Android App Feature Completion"] },
+  { name: "Cybersecurity Threat Assessment", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-04-14", end: "2025-05-09", status: "Done", dependsOn: ["PCB Layout Finalisation & Gerber Release", "App-Firmware Interface Specification Lock"] },
+  { name: "IEC 62304 Software Lifecycle Documentation", workstream: "Systems Software & Electronics", lead: "Head of SSE", start: "2025-02-17", end: "2025-05-16", status: "Done", dependsOn: ["App-Firmware Interface Specification Lock", "Embedded Glucose Algorithm Finalisation"] },
+  { name: "Sensor Selectivity Testing vs Interferents", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-01-06", end: "2025-02-28", status: "Done", dependsOn: [] },
+  { name: "Benchtop Accuracy Study (vs YSI reference)", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-01-06", end: "2025-03-14", status: "Done", dependsOn: ["Sensor Selectivity Testing vs Interferents"] },
+  { name: "Enzyme Formulation Optimisation", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-01-06", end: "2025-03-14", status: "Done", dependsOn: [] },
+  { name: "Membrane Crosslinking Process Lock", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-03-17", end: "2025-04-04", status: "Done", dependsOn: ["Enzyme Formulation Optimisation"] },
+  { name: "Lot-to-Lot Variability Study", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-02-24", end: "2025-04-04", status: "Done", dependsOn: ["Enzyme Formulation Optimisation"] },
+  { name: "Raw Material Supplier Approval", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-02-24", end: "2025-04-04", status: "Done", dependsOn: ["Enzyme Formulation Optimisation"] },
+  { name: "14-Day Wear Stability Study", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-04-07", end: "2025-05-09", status: "Done", dependsOn: ["Enzyme Formulation Optimisation", "Membrane Crosslinking Process Lock"] },
+  { name: "Accelerated Ageing & Shelf Life Study", workstream: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "2025-03-03", end: "2025-05-16", status: "Done", dependsOn: ["Enzyme Formulation Optimisation", "Membrane Crosslinking Process Lock"] },
+  { name: "CAPA Log Review & Closure", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-01-06", end: "2025-03-14", status: "Done", dependsOn: [] },
+  { name: "Supplier Audit Programme", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-02-10", end: "2025-03-28", status: "Done", dependsOn: ["CM Supplier Qualification Audit"] },
+  { name: "Risk Management File Update (ISO 14971)", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-01-06", end: "2025-04-25", status: "Done", dependsOn: ["CAPA Log Review & Closure"] },
+  { name: "Design History File (DHF) Gap Analysis & Closure", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-01-06", end: "2025-04-25", status: "Done", dependsOn: ["CAPA Log Review & Closure"] },
+  { name: "Regulatory Strategy Document (CE/FDA)", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-02-10", end: "2025-04-11", status: "Done", dependsOn: [] },
+  { name: "Essential Requirements / Performance Checklist", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-04-14", end: "2025-05-09", status: "Done", dependsOn: ["Design History File (DHF) Gap Analysis & Closure", "Regulatory Strategy Document (CE/FDA)"] },
+  { name: "Design Verification Plan Approval", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-04-28", end: "2025-05-23", status: "Done", dependsOn: ["Risk Management File Update (ISO 14971)", "Design History File (DHF) Gap Analysis & Closure", "Essential Requirements / Performance Checklist"] },
+  { name: "Post-Market Surveillance Plan", workstream: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "2025-04-14", end: "2025-05-23", status: "Done", dependsOn: ["Regulatory Strategy Document (CE/FDA)"] },
+  { name: "CRO Selection & Contract Execution", workstream: "Clinical", lead: "Head of Clinical", start: "2025-01-06", end: "2025-02-14", status: "Done", dependsOn: [] },
+  { name: "Clinical Protocol Development & Finalisation", workstream: "Clinical", lead: "Head of Clinical", start: "2025-01-20", end: "2025-03-14", status: "Done", dependsOn: ["CRO Selection & Contract Execution"] },
+  { name: "IRB / Ethics Committee Submission", workstream: "Clinical", lead: "Head of Clinical", start: "2025-03-17", end: "2025-04-25", status: "Done", dependsOn: ["Clinical Protocol Development & Finalisation"] },
+  { name: "CRF & Data Collection Tool Development", workstream: "Clinical", lead: "Head of Clinical", start: "2025-02-17", end: "2025-04-11", status: "Done", dependsOn: ["CRO Selection & Contract Execution", "Clinical Protocol Development & Finalisation"] },
+  { name: "SAE Reporting & Pharmacovigilance Process", workstream: "Clinical", lead: "Head of Clinical", start: "2025-03-17", end: "2025-05-02", status: "Done", dependsOn: ["CRO Selection & Contract Execution", "Clinical Protocol Development & Finalisation"] },
+  { name: "Site Selection & Initiation (Site 1)", workstream: "Clinical", lead: "Head of Clinical", start: "2025-04-28", end: "2025-05-30", status: "Done", dependsOn: ["IRB / Ethics Committee Submission"] },
+  { name: "Site Selection & Initiation (Site 2)", workstream: "Clinical", lead: "Head of Clinical", start: "2025-04-28", end: "2025-06-06", status: "Done", dependsOn: ["IRB / Ethics Committee Submission"] },
+  { name: "Investigator Training Programme", workstream: "Clinical", lead: "Head of Clinical", start: "2025-06-09", end: "2025-06-20", status: "Done", dependsOn: ["Site Selection & Initiation (Site 1)", "Site Selection & Initiation (Site 2)"] },
+  { name: "IP Labelling & Packaging for Trial", workstream: "Clinical", lead: "Head of Clinical", start: "2025-06-09", end: "2025-06-27", status: "Done", dependsOn: ["Site Selection & Initiation (Site 1)", "Pilot Build #3 - 30 Unit Build"] },
+];
+
+const MILESTONES = [
+  { name: "Mechanical Design Freeze", workstream: "Mechanical", target: "2025-06-02", gate: "Go" },
+  { name: "Electronics & Firmware Design Freeze", workstream: "Systems Software & Electronics", target: "2025-05-19", gate: "Conditional Go" },
+  { name: "App Design Freeze", workstream: "Systems Software & Electronics", target: "2025-04-14", gate: "Go" },
+  { name: "Chemistry & Biology Design Freeze", workstream: "Biology & Chemistry", target: "2025-05-19", gate: "Conditional Go" },
+  { name: "Manufacturing Pilot Build Complete", workstream: "Manufacturing", target: "2025-06-09", gate: "Go" },
+  { name: "DHF & Regulatory Readiness", workstream: "Regulatory & Quality", target: "2025-05-26", gate: "Go" },
+  { name: "DESIGN FREEZE", workstream: "All Workstreams", target: "2025-06-27", gate: "Go" },
+  { name: "Clinical Trial Readiness", workstream: "Clinical", target: "2025-07-25", gate: "Go" },
+];
+
+function parseDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d;
+}
+
+function statusClass(s) {
+  if (s === 'Done') return 'status-done';
+  if (s === 'In Progress') return 'status-progress';
+  if (s === 'At Risk') return 'status-at-risk';
+  return 'status-not-started';
+}
+
+function statusDot(s) {
+  if (s === 'Done') return '✓';
+  if (s === 'In Progress') return '●';
+  if (s === 'At Risk') return '▲';
+  return '○';
+}
+
+// Set today's date and default to nearest Monday
+document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+const today = new Date();
+const monday = getMonday(today);
+const pad = n => String(n).padStart(2, '0');
+document.getElementById('week-date').value = `${monday.getFullYear()}-${pad(monday.getMonth()+1)}-${pad(monday.getDate())}`;
+
+function generateMeeting() {
+  const dateVal = document.getElementById('week-date').value;
+  const wsFilter = document.getElementById('workstream-filter').value;
+
+  if (!dateVal) return;
+
+  const weekStart = parseDate(dateVal);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  // Filter projects that overlap this week
+  let activeProjects = PROJECTS.filter(p => {
+    const s = parseDate(p.start);
+    const e = parseDate(p.end);
+    return s <= weekEnd && e >= weekStart;
+  });
+
+  if (wsFilter !== 'all') {
+    activeProjects = activeProjects.filter(p => p.workstream === wsFilter);
+  }
+
+  // Projects ending this week
+  const endingThisWeek = activeProjects.filter(p => {
+    const e = parseDate(p.end);
+    return e >= weekStart && e <= weekEnd;
+  });
+
+  // Projects starting this week
+  const startingThisWeek = activeProjects.filter(p => {
+    const s = parseDate(p.start);
+    return s >= weekStart && s <= weekEnd;
+  });
+
+  // Milestones within 4 weeks
+  const fourWeeksOut = new Date(weekStart);
+  fourWeeksOut.setDate(fourWeeksOut.getDate() + 28);
+  let upcomingMilestones = MILESTONES.filter(m => {
+    const t = parseDate(m.target);
+    return t >= weekStart && t <= fourWeeksOut;
+  });
+  if (wsFilter !== 'all') {
+    upcomingMilestones = upcomingMilestones.filter(m => m.workstream === wsFilter || m.workstream === 'All Workstreams');
+  }
+
+  // Stats
+  const inProgress = activeProjects.filter(p => p.status === 'In Progress').length;
+  const atRisk = activeProjects.filter(p => p.status === 'At Risk').length;
+  const done = activeProjects.filter(p => p.status === 'Done').length;
+
+  const wsLabel = wsFilter === 'all' ? 'All Workstreams' : wsFilter;
+
+  let html = `
+    <div class="top-bar">
+      <div class="week-header">
+        <div class="week-title">Week of ${formatDate(weekStart)}</div>
+        <div class="week-subtitle">${wsLabel.toUpperCase()} · ${formatDate(weekStart)} → ${formatDate(weekEnd)}</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value">${activeProjects.length}</div>
+        <div class="stat-label">Active Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent)">${inProgress}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--red)">${atRisk}</div>
+        <div class="stat-label">At Risk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--amber)">${upcomingMilestones.length}</div>
+        <div class="stat-label">Upcoming Gates</div>
+      </div>
+    </div>
+  `;
+
+  // Active projects this week
+  html += `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Active This Week</div>
+        <div class="section-count">${activeProjects.length}</div>
+      </div>
+      <div class="project-grid">
+  `;
+
+  if (activeProjects.length === 0) {
+    html += `<div style="color:var(--text-dim);font-size:13px;padding:16px 0;">No active projects this week for this workstream.</div>`;
+  } else {
+    activeProjects.forEach(p => {
+      const isEnding = endingThisWeek.includes(p);
+      const isStarting = startingThisWeek.includes(p);
+      const tag = isEnding ? `<span style="font-size:10px;color:var(--amber);font-family:'DM Mono',monospace;margin-left:8px;">ENDS THIS WEEK</span>` :
+                  isStarting ? `<span style="font-size:10px;color:var(--green);font-family:'DM Mono',monospace;margin-left:8px;">STARTS THIS WEEK</span>` : '';
+      html += `
+        <div class="project-card">
+          <div>
+            <div class="project-name">${p.name}${tag}</div>
+            ${p.dependsOn.length > 0 ? `<div class="project-dep">Depends on: ${p.dependsOn.join(', ')}</div>` : ''}
+          </div>
+          <div class="workstream-tag">${p.workstream.replace('Systems Software & Electronics','SSE').replace('Biology & Chemistry','Bio & Chem').replace('Regulatory & Quality','Reg & Quality')}</div>
+          <div class="project-meta">${formatDate(parseDate(p.end))}</div>
+          <div><span class="status-pill ${statusClass(p.status)}">${statusDot(p.status)} ${p.status}</span></div>
+        </div>
+      `;
+    });
+  }
+  html += `</div></div>`;
+
+  // Upcoming milestones
+  html += `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Upcoming Gate Decisions</div>
+        <div class="section-count">${upcomingMilestones.length} within 4 weeks</div>
+      </div>
+  `;
+
+  if (upcomingMilestones.length === 0) {
+    html += `<div style="color:var(--text-dim);font-size:13px;padding:16px 0;">No gate decisions within the next 4 weeks.</div>`;
+  } else {
+    upcomingMilestones.forEach(m => {
+      const t = parseDate(m.target);
+      const daysUntil = Math.round((t - weekStart) / (1000 * 60 * 60 * 24));
+      const daysClass = daysUntil <= 7 ? 'days-soon' : daysUntil <= 14 ? 'days-upcoming' : 'days-past';
+      const isFreeeze = m.name === 'DESIGN FREEZE';
+      html += `
+        <div class="milestone-card">
+          <div class="milestone-name ${isFreeeze ? 'design-freeze' : ''}">${isFreeeze ? '🔒 ' : ''}${m.name}</div>
+          <div class="workstream-tag">${m.workstream.replace('Systems Software & Electronics','SSE').replace('Biology & Chemistry','Bio & Chem').replace('Regulatory & Quality','Reg & Quality')}</div>
+          <div class="project-meta">${formatDate(t)}</div>
+          <div class="days-badge ${daysClass}">${daysUntil === 0 ? 'THIS WEEK' : `${daysUntil}d away`}</div>
+        </div>
+      `;
+    });
+  }
+  html += `</div>`;
+
+  // Meeting agenda
+  const agendaItems = wsFilter === 'all' ? [
+    "Programme RAG status — workstream leads to confirm red/amber items",
+    "Critical path update — Biology & Chemistry stability data and Manufacturing yield",
+    "Open risks review — any new risks or changes to existing mitigations",
+    "Upcoming gate readiness — evidence packs and decision owners confirmed",
+    "Decisions required this week — escalations and blockers",
+    "Actions from last week — confirm closed or carry forward with owner",
+  ] : [
+    `${wsFilter} workstream RAG update — leads to confirm status`,
+    "Projects ending this week — confirm completion criteria met",
+    "Projects at risk — blockers, mitigations, and escalations needed",
+    "Dependencies check — anything blocking downstream workstreams",
+    "Resource or capacity issues to flag to programme lead",
+    "Actions from last week — closed or carried forward",
+  ];
+
+  html += `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Meeting Agenda</div>
+      </div>
+      <div class="agenda-grid">
+        <div class="agenda-card">
+          <h4>Standing Items</h4>
+          ${agendaItems.map((item, i) => `
+            <div class="agenda-item">
+              <div class="agenda-num">${String(i+1).padStart(2,'0')}</div>
+              <div>${item}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="agenda-card">
+          <h4>Notes & Actions</h4>
+          <textarea class="notes-area" placeholder="Add meeting notes here...&#10;&#10;Actions:&#10;[ ] Owner — Action&#10;[ ] Owner — Action"></textarea>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('output').innerHTML = html;
+}
+</script>
+</body>
+</html>
