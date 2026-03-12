@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Cross-Team Sync</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;900&family=Epilogue:ital@1&display=swap');
+
+  :root {
+    --bg: #08080d;
+    --surface: #0f0f18;
+    --surface2: #14141f;
+    --border: #1c1c2e;
+    --border-mid: #252538;
+    --text: #f0f0fa;
+    --text-muted: #6060a0;
+    --text-dim: #28284a;
+    --c1: #ff6b6b;
+    --c2: #ffd93d;
+    --c3: #6bcb77;
+    --c4: #4d96ff;
+    --c5: #c77dff;
+    --c6: #ff9f1c;
+    --green: #6bcb77;
+    --green-dim: #0d1f10;
+    --amber: #ffd93d;
+    --amber-dim: #1f1a00;
+    --red: #ff6b6b;
+    --red-dim: #1f0d0d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(8,8,13,0.96);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .logo span {
+    background: linear-gradient(90deg, var(--c4), var(--c5));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .controls {
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+    background: var(--surface);
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .control-group input,
+  .control-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    padding: 9px 12px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    outline: none;
+    appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  .control-group input:focus,
+  .control-group select:focus { border-color: var(--c4); }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .primary-btn {
+    background: linear-gradient(135deg, var(--c4), var(--c5));
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .primary-btn:hover { opacity: 0.85; }
+
+  .secondary-btn {
+    background: transparent;
+    border: 1px solid var(--border-mid);
+    color: var(--text-muted);
+    padding: 10px 16px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .secondary-btn:hover { border-color: var(--c4); color: var(--c4); }
+
+  .main { padding: 32px; max-width: 1100px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* SYNC HEADER */
+  .sync-header {
+    margin-bottom: 32px;
+  }
+
+  .sync-title {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .sync-meta {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  /* WS CARDS */
+  .ws-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .ws-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+
+  .ws-card:hover { border-color: var(--border-mid); }
+
+  .ws-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .ws-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ws-card-name {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    flex: 1;
+    margin-left: 8px;
+  }
+
+  .rag-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .rag-green { background: var(--green-dim); color: var(--green); }
+  .rag-amber { background: var(--amber-dim); color: var(--amber); }
+  .rag-red { background: var(--red-dim); color: var(--red); }
+
+  .ws-update-area {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 10px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 12px;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    transition: border-color 0.2s;
+  }
+
+  .ws-update-area:focus { border-color: var(--border-mid); }
+  .ws-update-area::placeholder { color: var(--text-dim); }
+
+  .ws-rag-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .rag-btn {
+    flex: 1;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+
+  .rag-btn:hover { border-color: var(--border-mid); }
+  .rag-btn.active-green { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+  .rag-btn.active-amber { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+  .rag-btn.active-red { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+  /* SECTIONS */
+  .section { margin-bottom: 32px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-count {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  /* DEPENDENCY CONFLICTS */
+  .conflict-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .conflict-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .conflict-meta { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+
+  .conflict-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .cs-blocked { background: var(--red-dim); color: var(--red); }
+  .cs-resolved { background: var(--green-dim); color: var(--green); }
+  .cs-monitoring { background: var(--amber-dim); color: var(--amber); }
+
+  /* SHARED ITEMS */
+  .shared-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+
+  .shared-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .shared-item-title { font-size: 13px; font-weight: 600; }
+
+  .from-to {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .from-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+
+  .shared-item-content {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* DECISIONS NEEDED */
+  .decision-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--c4);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+
+  .decision-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .decision-context { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+
+  .decision-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .decision-input::placeholder { color: var(--text-dim); }
+
+  /* ACTIONS */
+  .action-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+
+  .action-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+  }
+
+  .action-input::placeholder { color: var(--text-dim); }
+
+  .action-select {
+    background: var(--surface2);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    padding: 5px 8px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+    appearance: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s;
+  }
+
+  .remove-btn:hover { color: var(--red); }
+
+  .add-btn {
+    background: transparent;
+    border: 1px dashed var(--border-mid);
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 6px;
+    width: 100%;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .add-btn:hover { border-color: var(--c4); color: var(--c4); }
+
+  /* NEXT SYNC */
+  .next-sync-box {
+    background: var(--surface);
+    border: 1px solid var(--border-mid);
+    border-radius: 10px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .next-sync-field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .next-sync-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    outline: none;
+    appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  .next-sync-input:focus { border-color: var(--c4); }
+
+  .programme-pulse {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .pulse-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .pulse-ws {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .pulse-rag {
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> Cross-Team Sync</div>
+  <div style="font-size:11px;font-weight:600;color:var(--text-dim);letter-spacing:0.08em" id="header-date"></div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Sync Date</label>
+    <input type="date" id="sync-date" />
+  </div>
+  <div class="control-group">
+    <label>Chaired By</label>
+    <input type="text" id="chair" placeholder="e.g. Programme Lead" />
+  </div>
+  <div class="btn-row">
+    <button class="primary-btn" onclick="generateSync()">Generate Sync</button>
+    <button class="secondary-btn" onclick="window.print()">Export</button>
+  </div>
+</div>
+
+<div class="main" id="output">
+  <div class="empty-state">↑ Set a date to generate the cross-team sync agenda</div>
+</div>
+
+<script>
+const WS_COLOURS = ['var(--c1)', 'var(--c4)', 'var(--c3)', 'var(--c2)', 'var(--c5)', 'var(--c6)'];
+const WORKSTREAMS = [
+  { name: 'Mechanical', short: 'MECH', colour: 'var(--c1)' },
+  { name: 'Systems Software & Electronics', short: 'SSE', colour: 'var(--c4)' },
+  { name: 'Manufacturing', short: 'MFG', colour: 'var(--c3)' },
+  { name: 'Biology & Chemistry', short: 'BIO', colour: 'var(--c2)' },
+  { name: 'Regulatory & Quality', short: 'REG', colour: 'var(--c5)' },
+  { name: 'Clinical', short: 'CLIN', colour: 'var(--c6)' },
+];
+
+const DEPENDENCIES = [
+  { from: 'Manufacturing', to: 'Clinical', title: 'Pilot Build #3 units required for IP labelling & clinical supply', status: 'resolved', note: 'Pilot Build #3 delivered 35 units on 6 Jun 2025. Clinical supply confirmed as sufficient.' },
+  { from: 'Biology & Chemistry', to: 'Manufacturing', title: 'Membrane crosslinking process lock required before deposition process finalisation', status: 'resolved', note: 'Crosslinking process locked 4 Apr 2025. Manufacturing process optimisation completed.' },
+  { from: 'Systems Software & Electronics', to: 'Regulatory & Quality', title: 'IEC 62304 documentation required for DHF completion', status: 'resolved', note: 'IEC 62304 documentation signed off 16 May 2025. DHF reached 97% at freeze gate.' },
+  { from: 'Regulatory & Quality', to: 'Clinical', title: 'IRB submission requires finalised clinical protocol', status: 'resolved', note: 'Protocol finalised 14 Mar 2025. IRB submission made 17 Mar 2025. Approvals received.' },
+  { from: 'All Workstreams', to: 'Clinical', title: 'Design Freeze must precede first patient dosing', status: 'resolved', note: 'Design Freeze confirmed 27 Jun 2025. Clinical trial commenced August 2025.' },
+];
+
+const SHARED_LEARNINGS = [
+  { from: 'Biology & Chemistry', to: 'Manufacturing', title: 'Enzyme crosslinking temperature sensitivity', content: 'Stability data showed ±2°C variance significantly impacts enzyme kinetics. Manufacturing deposition process should maintain strict temperature control throughout.' },
+  { from: 'Manufacturing', to: 'Systems Software & Electronics', title: 'Lot-to-lot sensor variability range', content: 'Final lot-to-lot variability within spec but at upper bound. Algorithm team should be aware — adaptive calibration approach may be needed at scale.' },
+  { from: 'Systems Software & Electronics', to: 'Regulatory & Quality', title: 'Cybersecurity findings from penetration testing', content: 'Two medium-severity findings resolved pre-freeze. MDCG 2019-16 framework worked well — recommend applying same approach to post-market surveillance.' },
+  { from: 'Clinical', to: 'Regulatory & Quality', title: 'IRB feedback on informed consent wording', content: 'Both IRBs requested minor wording changes to the risk section. Updated consent template should be used for any future submissions.' },
+];
+
+const DECISIONS = [
+  { title: 'Real-time stability study continuation post-freeze', context: 'Accelerated ageing supports 12-month shelf life claim. Real-time study continues post-freeze. Decision needed: at what point is real-time data sufficient to remove the residual R-020 risk?', teams: 'Biology & Chemistry, Regulatory & Quality' },
+  { title: 'Scale-up CM strategy — incumbent vs. alternative supplier', context: 'Incumbent CM yield recovered to 93% at pilot scale. Alternative supplier now qualified. Decision needed: which supplier strategy for commercial scale-up?', teams: 'Manufacturing, Co-founders' },
+  { title: 'Post-trial design change process', context: 'If clinical trial generates device feedback, what is the change control process? Need to define ECO process and impact assessment criteria before trial starts.', teams: 'All Workstreams, Regulatory & Quality' },
+];
+
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const today = new Date();
+const pad = n => String(n).padStart(2,'0');
+document.getElementById('sync-date').value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+let actionCount = 3;
+
+function setRag(wsIdx, colour) {
+  ['green','amber','red'].forEach(c => {
+    document.getElementById(`rag-${wsIdx}-${c}`)?.classList.remove(`active-${c}`);
+  });
+  document.getElementById(`rag-${wsIdx}-${colour}`)?.classList.add(`active-${colour}`);
+  document.getElementById(`pulse-${wsIdx}`).textContent = colour === 'green' ? '🟢' : colour === 'amber' ? '🟡' : '🔴';
+}
+
+function addAction() {
+  actionCount++;
+  const table = document.getElementById('actions-table');
+  const row = document.createElement('div');
+  row.className = 'action-row';
+  row.innerHTML = `
+    <input class="action-input" placeholder="Describe the cross-team action..." />
+    <select class="action-select">
+      <option>Head of Mechanical</option>
+      <option>Head of SSE</option>
+      <option>Head of Manufacturing</option>
+      <option>Head of Biology & Chemistry</option>
+      <option>Head of Regulatory & Quality</option>
+      <option>Head of Clinical</option>
+      <option>Programme Lead</option>
+      <option>Co-founders</option>
+    </select>
+    <select class="action-select">
+      <option>Mechanical</option>
+      <option>SSE</option>
+      <option>Manufacturing</option>
+      <option>Biology & Chemistry</option>
+      <option>Reg & Quality</option>
+      <option>Clinical</option>
+      <option>All</option>
+    </select>
+    <input type="date" class="action-select" style="width:100%" />
+    <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+  `;
+  table.appendChild(row);
+}
+
+function generateSync() {
+  const dateVal = document.getElementById('sync-date').value;
+  const chair = document.getElementById('chair').value || 'Programme Lead';
+  if (!dateVal) return;
+
+  const dateFormatted = new Date(dateVal).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const html = `
+    <div class="sync-header">
+      <div class="sync-title">Cross-Team Sync</div>
+      <div class="sync-meta">${dateFormatted} · Chaired by ${chair} · All Department Heads</div>
+    </div>
+
+    <div class="programme-pulse">
+      ${WORKSTREAMS.map((ws, i) => `
+        <div class="pulse-card">
+          <div class="pulse-ws">${ws.short}</div>
+          <div class="pulse-rag" id="pulse-${i}">⚪</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Workstream Updates</div>
+        <div class="section-count">5 min per workstream</div>
+      </div>
+      <div class="ws-overview">
+        ${WORKSTREAMS.map((ws, i) => `
+          <div class="ws-card">
+            <div class="ws-card-top">
+              <div class="ws-dot" style="background:${ws.colour}"></div>
+              <div class="ws-card-name">${ws.short}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;font-weight:500">${ws.name}</div>
+            <div class="ws-rag-selector">
+              <button class="rag-btn" id="rag-${i}-green" onclick="setRag(${i},'green')">🟢 Green</button>
+              <button class="rag-btn" id="rag-${i}-amber" onclick="setRag(${i},'amber')">🟡 Amber</button>
+              <button class="rag-btn" id="rag-${i}-red" onclick="setRag(${i},'red')">🔴 Red</button>
+            </div>
+            <textarea class="ws-update-area" placeholder="Key update from ${ws.name} this period...&#10;&#10;What's progressed? Any blockers? What do other teams need to know?"></textarea>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Cross-Team Dependencies</div>
+        <div class="section-count">${DEPENDENCIES.length} dependencies tracked</div>
+      </div>
+      ${DEPENDENCIES.map(d => `
+        <div class="conflict-row">
+          <div>
+            <div class="conflict-title">${d.title}</div>
+            <div class="conflict-meta">
+              <strong style="color:var(--text)">${d.from}</strong> → <strong style="color:var(--text)">${d.to}</strong><br/>
+              ${d.note}
+            </div>
+          </div>
+          <div class="conflict-status ${d.status === 'resolved' ? 'cs-resolved' : d.status === 'blocked' ? 'cs-blocked' : 'cs-monitoring'}">
+            ${d.status === 'resolved' ? '✓ Resolved' : d.status === 'blocked' ? '⚠ Blocked' : '👁 Monitoring'}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Shared Learnings</div>
+        <div class="section-count">Knowledge transfer across workstreams</div>
+      </div>
+      ${SHARED_LEARNINGS.map((s, i) => `
+        <div class="shared-item">
+          <div class="shared-item-header">
+            <div class="shared-item-title">${s.title}</div>
+            <div class="from-to">
+              <span class="from-tag" style="background:var(--surface2);color:var(--text-muted)">${s.from}</span>
+              → ${s.to}
+            </div>
+          </div>
+          <div class="shared-item-content">${s.content}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:12px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Add a learning to share</div>
+        <textarea style="width:100%;background:var(--surface);border:1px solid var(--border-mid);color:var(--text);padding:12px;font-family:'Epilogue',sans-serif;font-size:13px;border-radius:8px;resize:none;outline:none;min-height:80px" placeholder="From which team? To which team? What should they know?"></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Decisions Required</div>
+        <div class="section-count">${DECISIONS.length} open decisions</div>
+      </div>
+      ${DECISIONS.map(d => `
+        <div class="decision-item">
+          <div class="decision-title">${d.title}</div>
+          <div class="decision-context">${d.context}<br/><strong style="color:var(--text);font-size:11px">Teams involved: ${d.teams}</strong></div>
+          <input class="decision-input" placeholder="Record decision made in this meeting..." />
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Programme Risk Pulse</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+          <div style="text-align:center">
+            <div style="font-size:32px;font-weight:900;color:var(--red)">0</div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted)">Critical Open Risks</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:32px;font-weight:900;color:var(--amber)">1</div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted)">Mitigating</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:32px;font-weight:900;color:var(--green)">19</div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted)">Closed</div>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:12px;color:var(--text-muted);line-height:1.7">
+          <strong style="color:var(--amber)">R-020 (Mitigating):</strong> Accelerated ageing data supports 12-month shelf life claim. Real-time stability study continuing post-freeze. No action required before trial start.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Actions from This Sync</div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;padding:0 14px 8px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)">
+        <div>Action</div><div>Owner</div><div>Workstream</div><div>Due</div><div></div>
+      </div>
+      <div id="actions-table">
+        ${[1,2,3].map(i => `
+          <div class="action-row">
+            <input class="action-input" placeholder="Describe the cross-team action..." />
+            <select class="action-select">
+              <option>Head of Mechanical</option>
+              <option>Head of SSE</option>
+              <option>Head of Manufacturing</option>
+              <option>Head of Biology & Chemistry</option>
+              <option>Head of Regulatory & Quality</option>
+              <option>Head of Clinical</option>
+              <option>Programme Lead</option>
+              <option>Co-founders</option>
+            </select>
+            <select class="action-select">
+              <option>Mechanical</option>
+              <option>SSE</option>
+              <option>Manufacturing</option>
+              <option>Biology & Chemistry</option>
+              <option>Reg & Quality</option>
+              <option>Clinical</option>
+              <option>All</option>
+            </select>
+            <input type="date" class="action-select" style="width:100%" />
+            <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="add-btn" onclick="addAction()">+ Add Action</button>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Next Cross-Team Sync</div>
+      </div>
+      <div class="next-sync-box">
+        <div class="next-sync-field">
+          <label>Date</label>
+          <input type="date" class="next-sync-input" />
+        </div>
+        <div class="next-sync-field">
+          <label>Chair</label>
+          <input type="text" class="next-sync-input" placeholder="Who will chair?" />
+        </div>
+        <div class="next-sync-field">
+          <label>Focus Topic</label>
+          <input type="text" class="next-sync-input" placeholder="Any specific agenda item?" />
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('output').innerHTML = html;
+}
+</script>
+</body>
+</html>
