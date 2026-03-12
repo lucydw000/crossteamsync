@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Milestone Stakeholder Update</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --accent-dim: #1a2a4a;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --purple: #a78bfa;
+    --purple-dim: #1e1a3a;
+    --gold: #f0c040;
+    --gold-dim: #2a1f00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.97);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--gold); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── MILESTONE NAV ── */
+  .milestone-nav {
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    background: var(--surface);
+  }
+
+  .ms-tab {
+    padding: 14px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .ms-tab:hover { color: var(--text); }
+  .ms-tab.active { color: var(--text); border-bottom-color: var(--gold); }
+
+  .ms-tab-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  .badge-go { background: var(--green-dim); color: var(--green); }
+  .badge-cgo { background: var(--amber-dim); color: var(--amber); }
+  .badge-nogo { background: var(--red-dim); color: var(--red); }
+  .badge-pending { background: var(--border); color: var(--text-muted); }
+
+  /* ── MAIN ── */
+  .main { padding: 40px 48px; max-width: 900px; }
+
+  /* ── UPDATE PAGE ── */
+  .update-page { display: none; }
+  .update-page.active { display: block; }
+
+  /* ── MILESTONE TITLE BLOCK ── */
+  .ms-title-block {
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ms-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .ms-title {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .ms-meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ms-meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .ms-meta-item span { color: var(--text); }
+
+  .decision-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pill-go { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+  .pill-cgo { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .pill-nogo { background: var(--red-dim); color: var(--red); border: 1px solid rgba(240,79,79,0.2); }
+  .pill-pending { background: var(--border); color: var(--text-muted); border: 1px solid var(--border-light); }
+
+  /* ── SUMMARY CARD ── */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    line-height: 1.85;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .summary-card p { margin-bottom: 12px; }
+  .summary-card p:last-child { margin-bottom: 0; }
+
+  /* ── STAT ROW ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 28px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── KEY OUTCOMES LIST ── */
+  .outcome-list { list-style: none; }
+
+  .outcome-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .outcome-item:last-child { border-bottom: none; }
+
+  .outcome-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  .outcome-text { font-size: 14px; line-height: 1.65; color: var(--text); }
+
+  .outcome-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* ── CONDITIONS (for Conditional Go) ── */
+  .condition-item {
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .condition-text { font-size: 13px; line-height: 1.6; }
+  .condition-owner { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 0.1em; }
+
+  .condition-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .cs-open { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+  .cs-closed { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,0.3); }
+
+  /* ── NEXT STEPS ── */
+  .next-step-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .next-step-item:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 20px;
+    margin-top: 2px;
+  }
+
+  .step-text { font-size: 13px; line-height: 1.6; color: var(--text); }
+  .step-when { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── SIGNATORIES ── */
+  .signatory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .signatory-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .signatory-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .signatory-name { font-size: 13px; font-weight: 500; }
+
+  /* ── PRINT / EXPORT ── */
+  .export-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .export-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  @media print {
+    .header, .milestone-nav { display: none; }
+    .main { padding: 0; }
+    .update-page { display: none !important; }
+    .update-page.active { display: block !important; }
+  }
+
+  /* ── PROGRESS TIMELINE ── */
+  .timeline-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 36px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tl-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    min-width: 90px;
+    cursor: pointer;
+  }
+
+  .tl-line {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .tl-item:last-child .tl-line { display: none; }
+
+  .tl-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: var(--surface);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: border-color 0.2s;
+    margin-bottom: 8px;
+  }
+
+  .tl-dot.go { border-color: var(--green); background: var(--green-dim); }
+  .tl-dot.cgo { border-color: var(--amber); background: var(--amber-dim); }
+  .tl-dot.active { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240,192,64,0.15); }
+
+  .tl-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .tl-item.active .tl-label { color: var(--text-muted); }
+
+  .tl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Milestone Updates</div>
+  <div class="header-right">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)" id="header-date"></div>
+    <button class="export-btn" onclick="window.print()">Export PDF</button>
+  </div>
+</div>
+
+<nav class="milestone-nav" id="milestone-nav"></nav>
+
+<div class="main" id="main"></div>
+
+<script>
+const MILESTONES = [
+  {
+    id: 'ms1',
+    number: 'Milestone 01',
+    title: 'App Design Freeze',
+    date: '14 April 2025',
+    workstream: 'Systems Software & Electronics',
+    decision: 'go',
+    decisionDate: '14 April 2025',
+    decidedBy: 'Head of SSE, Programme Lead',
+    signatories: [
+      { role: 'Head of SSE', name: 'Head of SSE' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '100%', label: 'Projects Complete', colour: 'var(--green)' },
+      { value: '0', label: 'Open Risks', colour: 'var(--green)' },
+      { value: 'Go', label: 'Gate Decision', colour: 'var(--green)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      'The app interface has reached design freeze. All core user-facing features — glucose trend display, alert configuration, session management, and Bluetooth pairing — have been locked and are ready for verification testing.',
+      'User interface documentation has been completed and submitted to the Design History File. The app build is stable across iOS and Android and no critical issues remain outstanding.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'UI/UX design locked across iOS and Android platforms', sub: 'All user flows verified against clinical use requirements' },
+      { icon: '✅', text: 'BLE stack fully stable — dropout issue resolved', sub: 'Zero data dropouts observed across 200-hour soak test' },
+      { icon: '✅', text: 'IEC 62304 software lifecycle documentation complete', sub: 'Submitted to DHF and signed off by Regulatory & Quality' },
+      { icon: '✅', text: 'Glucose alert thresholds and snooze logic finalised', sub: 'Aligned with clinical protocol and ISO 15197 requirements' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'App build handed to verification team for IEC 62304 testing', when: 'w/c 14 April 2025' },
+      { text: 'Software documentation reviewed in DHF gap closure process', when: 'April–May 2025' },
+      { text: 'App version locked — no further feature changes permitted', when: 'Immediate' },
+    ],
+  },
+  {
+    id: 'ms2',
+    number: 'Milestone 02',
+    title: 'Electronics & Firmware Design Freeze',
+    date: '19 May 2025',
+    workstream: 'Systems Software & Electronics',
+    decision: 'cgo',
+    decisionDate: '19 May 2025',
+    decidedBy: 'Head of SSE, Head of Regulatory & Quality, Programme Lead',
+    signatories: [
+      { role: 'Head of SSE', name: 'Head of SSE' },
+      { role: 'Head of Reg & Quality', name: 'Head of Regulatory & Quality' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '100%', label: 'Projects Complete', colour: 'var(--green)' },
+      { value: '1', label: 'Open Condition', colour: 'var(--amber)' },
+      { value: 'Cond. Go', label: 'Gate Decision', colour: 'var(--amber)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      'Electronics and firmware have reached design freeze. PCB layout has been finalised, Gerber files released to the contract manufacturer, and the embedded glucose algorithm has been locked following successful accuracy validation.',
+      'The gate decision is Conditional Go. One condition remains open: final EMC pre-compliance test report to be submitted within 10 days. This does not block the programme critical path and is expected to close before the master Design Freeze gate.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'PCB layout finalised and Gerbers released to CM', sub: 'First article inspection passed — no layout revisions required' },
+      { icon: '✅', text: 'Embedded glucose algorithm locked — MARD 9.2%', sub: 'Exceeds ISO 15197 accuracy threshold; validated across 3 sensor lots' },
+      { icon: '✅', text: 'Power management optimisation complete', sub: '14-day battery life confirmed under continuous monitoring conditions' },
+      { icon: '⚠️', text: 'EMC pre-compliance testing completed — report pending', sub: 'No failures observed; formal report expected within 10 days' },
+    ],
+    conditions: [
+      { text: 'EMC pre-compliance test report submitted to DHF and signed off by Head of Regulatory & Quality', owner: 'Head of SSE', status: 'open' },
+    ],
+    nextSteps: [
+      { text: 'EMC pre-compliance report submitted and condition closed', when: 'By 29 May 2025' },
+      { text: 'Electronics documentation reviewed in DHF closure process', when: 'May 2025' },
+      { text: 'Firmware version tagged and locked in version control', when: 'Immediate' },
+    ],
+  },
+  {
+    id: 'ms3',
+    number: 'Milestone 03',
+    title: 'Chemistry & Biology Design Freeze',
+    date: '19 May 2025',
+    workstream: 'Biology & Chemistry',
+    decision: 'cgo',
+    decisionDate: '19 May 2025',
+    decidedBy: 'Head of Biology & Chemistry, Head of Regulatory & Quality, Programme Lead',
+    signatories: [
+      { role: 'Head of Biology & Chemistry', name: 'Head of Biology & Chemistry' },
+      { role: 'Head of Reg & Quality', name: 'Head of Regulatory & Quality' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '100%', label: 'Projects Complete', colour: 'var(--green)' },
+      { value: '1', label: 'Mitigating Risk', colour: 'var(--amber)' },
+      { value: 'Cond. Go', label: 'Gate Decision', colour: 'var(--amber)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      'The sensor chemistry and biological components have reached design freeze. Enzyme formulation, membrane crosslinking process, and coating specifications have all been locked. The 14-day accelerated wear stability study returned data within specification, confirming the design is suitable for use.',
+      'The gate decision is Conditional Go. Accelerated ageing data supports the 12-month shelf life claim. The real-time stability study is continuing post-freeze as planned — this is standard practice for medical devices and does not affect the clinical trial start date.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'Enzyme formulation locked — stability at 37°C confirmed', sub: 'Full 14-day wear performance within ±15% specification limits' },
+      { icon: '✅', text: 'Lot-to-lot variability within specification', sub: 'CV < 8% across three production lots — manufacturing process stable' },
+      { icon: '✅', text: 'Membrane crosslinking process transferred to manufacturing', sub: 'Process parameters locked and documented in batch records' },
+      { icon: '🔵', text: 'Real-time shelf life study continuing (R-020)', sub: 'Accelerated ageing supports 12-month claim — real-time data ongoing as planned' },
+    ],
+    conditions: [
+      { text: 'Real-time shelf life study to reach 6-month timepoint with data within specification before commercial release. Study continues post-freeze — no impact on clinical trial.', owner: 'Head of Biology & Chemistry', status: 'open' },
+    ],
+    nextSteps: [
+      { text: 'Real-time stability study 3-month interim analysis reviewed', when: 'August 2025' },
+      { text: 'Chemistry documentation finalised in DHF', when: 'May 2025' },
+      { text: 'Sensor specification documents locked and issued to manufacturing', when: 'Immediate' },
+    ],
+  },
+  {
+    id: 'ms4',
+    number: 'Milestone 04',
+    title: 'DHF & Regulatory Readiness',
+    date: '26 May 2025',
+    workstream: 'Regulatory & Quality',
+    decision: 'go',
+    decisionDate: '26 May 2025',
+    decidedBy: 'Head of Regulatory & Quality, Programme Lead',
+    signatories: [
+      { role: 'Head of Reg & Quality', name: 'Head of Regulatory & Quality' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '97%', label: 'DHF Completion', colour: 'var(--green)' },
+      { value: '0', label: 'Critical Gaps', colour: 'var(--green)' },
+      { value: 'Go', label: 'Gate Decision', colour: 'var(--green)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      'The Design History File has reached the readiness threshold required to proceed to Design Freeze. 97% of DHF items are complete. The remaining 3% consists of two documentation items — the EMC pre-compliance report (pending from MS02) and the final design verification plan sign-off — both of which are on track to close before the master gate.',
+      'The regulatory submission strategy has been confirmed and all critical path documentation is in place for the FDA 510(k) pre-submission pathway.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'DHF gap analysis complete — 97% of items closed', sub: '2 non-critical items remain on tracked timeline to close' },
+      { icon: '✅', text: 'Design Verification & Validation plan approved', sub: 'DVV plan signed off by all workstream leads' },
+      { icon: '✅', text: '510(k) predicate device analysis complete', sub: 'Predicate identified and substantial equivalence rationale documented' },
+      { icon: '✅', text: 'Risk management file (ISO 14971) reviewed and approved', sub: '20 risks assessed; all residual risks accepted as acceptable' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'Remaining 2 DHF items closed (EMC report + DVV final sign-off)', when: 'By 30 May 2025' },
+      { text: 'DHF submitted for internal final audit before Design Freeze', when: 'June 2025' },
+      { text: '510(k) pre-submission meeting request filed with FDA', when: 'Q3 2025' },
+    ],
+  },
+  {
+    id: 'ms5',
+    number: 'Milestone 05',
+    title: 'Mechanical Design Freeze',
+    date: '2 June 2025',
+    workstream: 'Mechanical',
+    decision: 'go',
+    decisionDate: '2 June 2025',
+    decidedBy: 'Head of Mechanical, Programme Lead',
+    signatories: [
+      { role: 'Head of Mechanical', name: 'Head of Mechanical' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '100%', label: 'Projects Complete', colour: 'var(--green)' },
+      { value: '0', label: 'Open Risks', colour: 'var(--green)' },
+      { value: 'Go', label: 'Gate Decision', colour: 'var(--green)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      'The mechanical design has reached freeze. Enclosure geometry, material specifications, adhesion patch design, and all tooling have been finalised and released to the contract manufacturer. Biocompatibility testing under ISO 10993 has passed and wearability validation demonstrated the device is comfortable for 14-day continuous wear.',
+      'Tooling is in production at the contract manufacturer. First article parts are expected in advance of the Manufacturing Pilot Build.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'Enclosure geometry locked — DFM review passed with CM', sub: 'All 14 DFM comments resolved; geometry frozen' },
+      { icon: '✅', text: 'ISO 10993 biocompatibility testing passed', sub: 'No sensitisation, cytotoxicity, or irritation findings' },
+      { icon: '✅', text: 'Adhesion patch validated — 14-day wear performance confirmed', sub: 'Skin irritation rate 4.2% — well below 10% threshold' },
+      { icon: '✅', text: 'Tooling designed and released to CM', sub: 'Production lead time 6 weeks — on track for pilot build' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'First article parts inspected against drawings', when: 'w/c 9 June 2025' },
+      { text: 'Mechanical documentation finalised in DHF', when: 'June 2025' },
+      { text: 'Parts issued to manufacturing for Pilot Build #3', when: 'w/c 16 June 2025' },
+    ],
+  },
+  {
+    id: 'ms6',
+    number: 'Milestone 06',
+    title: 'Manufacturing Pilot Build Complete',
+    date: '9 June 2025',
+    workstream: 'Manufacturing',
+    decision: 'go',
+    decisionDate: '9 June 2025',
+    decidedBy: 'Head of Manufacturing, Programme Lead',
+    signatories: [
+      { role: 'Head of Manufacturing', name: 'Head of Manufacturing' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '35', label: 'Units Built', colour: 'var(--green)' },
+      { value: '94%', label: 'Yield', colour: 'var(--green)' },
+      { value: 'Go', label: 'Gate Decision', colour: 'var(--green)' },
+      { value: 'On Time', label: 'Delivery', colour: 'var(--green)' },
+    ],
+    summary: [
+      '35 clinical-grade devices have been built, inspected, and released for the clinical trial. The manufacturing process has demonstrated consistent yield of 94%, exceeding the 90% target set at programme start. All units have passed incoming inspection and are ready for labelling and clinical supply packaging.',
+      'The manufacturing process documentation is complete. Batch records, process parameters, and test procedures have been approved and submitted to the DHF.',
+    ],
+    outcomes: [
+      { icon: '✅', text: '35 devices built and released — sufficient for trial', sub: 'Target was 30 units; 5 additional units held as clinical spares' },
+      { icon: '✅', text: 'Yield 94% — exceeds 90% programme target', sub: 'Sensor membrane deposition process fully optimised and stable' },
+      { icon: '✅', text: 'All units passed incoming inspection', sub: 'Zero critical failures; 2 cosmetic rejections within AQL limits' },
+      { icon: '✅', text: 'Batch records and process documentation approved', sub: 'Submitted to DHF and signed off by Head of Regulatory & Quality' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'Clinical trial units labelled and packaged per clinical protocol', when: 'w/c 16 June 2025' },
+      { text: 'Units shipped to clinical sites following Design Freeze confirmation', when: 'July 2025' },
+      { text: 'Manufacturing scale-up planning initiated for commercial supply', when: 'Q3 2025' },
+    ],
+  },
+  {
+    id: 'ms7',
+    number: 'Milestone 07',
+    title: 'Design Freeze',
+    date: '27 June 2025',
+    workstream: 'All Workstreams',
+    decision: 'go',
+    decisionDate: '27 June 2025',
+    decidedBy: 'All Department Heads, Co-founders, Programme Lead',
+    signatories: [
+      { role: 'Head of Mechanical', name: 'Head of Mechanical' },
+      { role: 'Head of SSE', name: 'Head of SSE' },
+      { role: 'Head of Manufacturing', name: 'Head of Manufacturing' },
+      { role: 'Head of Biology & Chemistry', name: 'Head of Biology & Chemistry' },
+      { role: 'Head of Reg & Quality', name: 'Head of Regulatory & Quality' },
+      { role: 'Head of Clinical', name: 'Head of Clinical' },
+      { role: 'Co-founders', name: 'Co-founders' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+    ],
+    stats: [
+      { value: '52', label: 'Projects Completed', colour: 'var(--green)' },
+      { value: '19', label: 'Risks Closed', colour: 'var(--green)' },
+      { value: 'Go', label: 'Master Gate', colour: 'var(--green)' },
+      { value: '27 Jun', label: 'On Schedule', colour: 'var(--green)' },
+    ],
+    summary: [
+      'SAVA has reached Design Freeze. All six workstreams — Mechanical, Systems Software & Electronics, Manufacturing, Biology & Chemistry, Regulatory & Quality, and Clinical — have met their readiness criteria. The device design is locked and no further changes will be made prior to the pivotal clinical trial.',
+      'This milestone marks the successful completion of a six-month development programme from functional prototype to frozen design. The programme delivered on time against a challenging timeline, with all 52 projects completed, 19 risks closed, and a 94% manufacturing yield achieved.',
+      'The pivotal clinical trial is scheduled to begin in August 2025, with results expected February 2026. The Design History File is 99% complete, with one tracked item (real-time stability study) continuing as planned post-freeze.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'All six workstreams reached readiness criteria', sub: 'No workstream vetoed or deferred at the master gate' },
+      { icon: '✅', text: '52 projects completed across the programme', sub: 'All delivered on or before planned end dates' },
+      { icon: '✅', text: 'DHF 99% complete — no blocking gaps', sub: '1 tracked item (real-time stability) continuing post-freeze as planned' },
+      { icon: '✅', text: 'Clinical trial units built, tested and ready for shipment', sub: '35 units released; sufficient supply for pivotal trial plus spares' },
+      { icon: '✅', text: 'Manufacturing process stable at 94% yield', sub: 'Exceeds 90% target; scale-up planning underway' },
+      { icon: '✅', text: 'Design change control process in place post-freeze', sub: 'ECO process defined; any changes require formal impact assessment' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'Clinical trial units shipped to all investigator sites', when: 'July 2025' },
+      { text: 'Investigator training programme completed at all sites', when: '9–20 June 2025' },
+      { text: 'Pivotal clinical trial commences — first patient enrolled', when: 'August 2025' },
+      { text: 'Real-time stability study 3-month interim review', when: 'August 2025' },
+      { text: 'FDA 510(k) pre-submission meeting', when: 'Q3 2025' },
+      { text: 'Clinical trial results expected and submission preparation begins', when: 'February 2026' },
+    ],
+  },
+  {
+    id: 'ms8',
+    number: 'Milestone 08',
+    title: 'Clinical Trial Readiness',
+    date: '25 July 2025',
+    workstream: 'Clinical',
+    decision: 'go',
+    decisionDate: '25 July 2025',
+    decidedBy: 'Head of Clinical, Programme Lead, Co-founders',
+    signatories: [
+      { role: 'Head of Clinical', name: 'Head of Clinical' },
+      { role: 'Programme Lead', name: 'Programme Lead' },
+      { role: 'Co-founders', name: 'Co-founders' },
+    ],
+    stats: [
+      { value: '3', label: 'Sites Ready', colour: 'var(--green)' },
+      { value: '100%', label: 'Investigators Trained', colour: 'var(--green)' },
+      { value: 'Go', label: 'Gate Decision', colour: 'var(--green)' },
+      { value: 'Aug 2025', label: 'Trial Start', colour: 'var(--green)' },
+    ],
+    summary: [
+      'All clinical trial sites are ready to enrol the first patient. IRB approvals have been received at all three sites, investigator training is complete, devices have been shipped and accounted for, and the trial management system is live.',
+      'The pivotal trial will enrol participants wearing the SAVA CGM device continuously for 14 days. The trial is designed to generate clinical evidence for the FDA 510(k) submission. Results are expected February 2026.',
+    ],
+    outcomes: [
+      { icon: '✅', text: 'IRB / ethics approval received at all 3 clinical sites', sub: 'Final approval received 18 July 2025' },
+      { icon: '✅', text: 'All principal investigators trained and certified', sub: 'Training completed 9–20 June 2025 per investigator training programme' },
+      { icon: '✅', text: 'Devices shipped and reconciled at all sites', sub: '35 units distributed across 3 sites per clinical supply plan' },
+      { icon: '✅', text: 'Trial management system and eCRF live', sub: 'CTMS configured; site staff trained on data entry procedures' },
+      { icon: '✅', text: 'Clinical supply chain confirmed — resupply plan in place', sub: 'Protocol allows for device replacement in case of early sensor failure' },
+    ],
+    conditions: [],
+    nextSteps: [
+      { text: 'First patient enrolled and device applied', when: 'August 2025' },
+      { text: 'Safety monitoring board (DSMB) first review', when: 'After first 10 patients' },
+      { text: 'Interim data analysis at 50% enrolment', when: 'November 2025' },
+      { text: 'Full data lock and statistical analysis', when: 'January 2026' },
+      { text: 'Clinical trial results published / submitted', when: 'February 2026' },
+    ],
+  },
+];
+
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+let activeIdx = 0;
+
+function decisionLabel(d) {
+  if (d === 'go') return '✓ Go';
+  if (d === 'cgo') return '⚠ Conditional Go';
+  if (d === 'nogo') return '✗ No-Go';
+  return '— Pending';
+}
+
+function decisionPillClass(d) {
+  if (d === 'go') return 'pill-go';
+  if (d === 'cgo') return 'pill-cgo';
+  if (d === 'nogo') return 'pill-nogo';
+  return 'pill-pending';
+}
+
+function badgeClass(d) {
+  if (d === 'go') return 'badge-go';
+  if (d === 'cgo') return 'badge-cgo';
+  if (d === 'nogo') return 'badge-nogo';
+  return 'badge-pending';
+}
+
+function badgeLabel(d) {
+  if (d === 'go') return 'Go';
+  if (d === 'cgo') return 'Cond. Go';
+  if (d === 'nogo') return 'No-Go';
+  return 'Pending';
+}
+
+function dotClass(d) {
+  if (d === 'go') return 'go';
+  if (d === 'cgo') return 'cgo';
+  return '';
+}
+
+function buildNav() {
+  const nav = document.getElementById('milestone-nav');
+  nav.innerHTML = MILESTONES.map((ms, i) => `
+    <button class="ms-tab ${i === activeIdx ? 'active' : ''}" onclick="switchTo(${i})">
+      ${ms.number.replace('Milestone ', 'M')}
+      <span class="ms-tab-badge ${badgeClass(ms.decision)}">${badgeLabel(ms.decision)}</span>
+    </button>
+  `).join('');
+}
+
+function buildTimeline() {
+  return `
+    <div class="timeline-track">
+      ${MILESTONES.map((ms, i) => `
+        <div class="tl-item ${i === activeIdx ? 'active' : ''}" onclick="switchTo(${i})">
+          <div class="tl-dot ${dotClass(ms.decision)} ${i === activeIdx ? 'active' : ''}">${i === activeIdx ? '●' : ''}</div>
+          <div class="tl-line"></div>
+          <div class="tl-label">${ms.number.replace('Milestone ', 'M')}</div>
+          <div class="tl-date">${ms.date.split(' ').slice(0,2).join(' ')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function buildPage(ms) {
+  const isDesignFreeze = ms.id === 'ms7';
+
+  return `
+    ${buildTimeline()}
+
+    <div class="ms-title-block">
+      <div class="ms-number">${ms.number} · ${ms.workstream}</div>
+      <div class="ms-title">${ms.title}</div>
+      <div class="ms-meta-row">
+        <div class="decision-pill ${decisionPillClass(ms.decision)}">${decisionLabel(ms.decision)}</div>
+        <div class="ms-meta-item">Date: <span>${ms.decisionDate}</span></div>
+        <div class="ms-meta-item">Decision by: <span>${ms.decidedBy}</span></div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      ${ms.stats.map(s => `
+        <div class="stat-card">
+          <div class="stat-value" style="color:${s.colour}">${s.value}</div>
+          <div class="stat-label">${s.label}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Programme Update</div>
+      </div>
+      <div class="summary-card">
+        ${ms.summary.map(p => `<p>${p}</p>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Key Outcomes</div>
+      </div>
+      <ul class="outcome-list">
+        ${ms.outcomes.map(o => `
+          <li class="outcome-item">
+            <div class="outcome-icon">${o.icon}</div>
+            <div>
+              <div class="outcome-text">${o.text}</div>
+              <div class="outcome-sub">${o.sub}</div>
+            </div>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+
+    ${ms.conditions.length > 0 ? `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">⚠ Conditions to Close</div>
+      </div>
+      ${ms.conditions.map(c => `
+        <div class="condition-item">
+          <div>
+            <div class="condition-text">${c.text}</div>
+            <div class="condition-owner">Owner: ${c.owner}</div>
+          </div>
+          <div class="condition-status ${c.status === 'open' ? 'cs-open' : 'cs-closed'}">
+            ${c.status === 'open' ? 'Open' : 'Closed'}
+          </div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Next Steps</div>
+      </div>
+      ${ms.nextSteps.map((s, i) => `
+        <div class="next-step-item">
+          <div class="step-num">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="step-text">${s.text}</div>
+            <div class="step-when">${s.when}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Gate Signatories</div>
+      </div>
+      <div class="signatory-grid">
+        ${ms.signatories.map(s => `
+          <div class="signatory-card">
+            <div class="signatory-role">${s.role}</div>
+            <div class="signatory-name">${s.name}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function switchTo(idx) {
+  activeIdx = idx;
+  buildNav();
+  document.getElementById('main').innerHTML = buildPage(MILESTONES[idx]);
+}
+
+// Init
+buildNav();
+switchTo(0);
+</script>
+</body>
+</html>
