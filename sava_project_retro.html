@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Project Retrospective</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --accent-dim: #1a2a4a;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --purple: #a78bfa;
+    --purple-dim: #1e1a3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .controls {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .control-group label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .control-group select,
+  .control-group input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border-radius: 6px;
+    outline: none;
+    appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  .control-group select:focus,
+  .control-group input:focus { border-color: var(--accent); }
+
+  .generate-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .generate-btn:hover { opacity: 0.85; }
+
+  .main { padding: 32px; max-width: 1000px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* PROJECT HERO */
+  .project-hero {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .project-ws-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .project-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .meta-item span { color: var(--text); }
+
+  .delivery-badge {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+  }
+
+  .on-time { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SECTION */
+  .section { margin-bottom: 28px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* RETRO GRID */
+  .retro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .retro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .retro-card.positive { border-left: 3px solid var(--green); }
+  .retro-card.negative { border-left: 3px solid var(--red); }
+  .retro-card.learning { border-left: 3px solid var(--accent); }
+  .retro-card.process { border-left: 3px solid var(--amber); }
+
+  .retro-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .retro-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    min-height: 120px;
+  }
+
+  .retro-textarea::placeholder { color: var(--text-dim); }
+
+  /* RISK REVIEW */
+  .risk-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .risk-name { font-size: 13px; color: var(--text); }
+  .risk-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+  .risk-outcome-select {
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 6px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+    appearance: none;
+  }
+
+  .risk-note {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    width: 100%;
+    outline: none;
+    resize: none;
+    min-height: 36px;
+    line-height: 1.5;
+  }
+
+  .risk-note::placeholder { color: var(--text-dim); }
+
+  /* ACTIONS */
+  .action-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 6px;
+  }
+
+  .action-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+  }
+
+  .action-input::placeholder { color: var(--text-dim); }
+
+  .action-select {
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 5px 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+    appearance: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s;
+  }
+
+  .remove-btn:hover { color: var(--red); }
+
+  .add-btn {
+    background: transparent;
+    border: 1px dashed var(--border-light);
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 6px;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* SHARE BOX */
+  .share-box {
+    background: var(--accent-dim);
+    border: 1px solid rgba(91,141,238,0.2);
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 28px;
+  }
+
+  .share-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .share-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+  }
+
+  .share-textarea::placeholder { color: rgba(91,141,238,0.3); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Project Retrospective</div>
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)" id="header-date"></div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Select Project</label>
+    <select id="project-select">
+      <option value="">— Choose a completed project —</option>
+      <optgroup label="Mechanical">
+        <option value="0">DFM Review - Enclosure with CM</option>
+        <option value="1">Final Enclosure Geometry Lock</option>
+        <option value="2">Biocompatibility Testing (ISO 10993)</option>
+        <option value="3">Adhesion Patch & Wearability Validation</option>
+        <option value="4">Tooling Design & Release to Manufacturer</option>
+      </optgroup>
+      <optgroup label="Manufacturing">
+        <option value="5">Yield Improvement DOE</option>
+        <option value="6">Sensor Membrane Deposition Process Optimisation</option>
+        <option value="7">Pilot Build #3 - 30 Unit Build</option>
+      </optgroup>
+      <optgroup label="Systems Software & Electronics">
+        <option value="8">BLE Stack Stability Resolution</option>
+        <option value="9">PCB Layout Finalisation & Gerber Release</option>
+        <option value="10">Embedded Glucose Algorithm Finalisation</option>
+        <option value="11">IEC 62304 Software Lifecycle Documentation</option>
+      </optgroup>
+      <optgroup label="Biology & Chemistry">
+        <option value="12">Enzyme Formulation Optimisation</option>
+        <option value="13">14-Day Wear Stability Study</option>
+        <option value="14">Lot-to-Lot Variability Study</option>
+      </optgroup>
+      <optgroup label="Regulatory & Quality">
+        <option value="15">Design History File (DHF) Gap Analysis & Closure</option>
+        <option value="16">Design Verification Plan Approval</option>
+      </optgroup>
+      <optgroup label="Clinical">
+        <option value="17">CRO Selection & Contract Execution</option>
+        <option value="18">IRB / Ethics Committee Submission</option>
+        <option value="19">Investigator Training Programme</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="control-group">
+    <label>Facilitated By</label>
+    <input type="text" id="facilitator" placeholder="e.g. Head of Mechanical" />
+  </div>
+  <div class="control-group">
+    <label>Retro Date</label>
+    <input type="date" id="retro-date" />
+  </div>
+  <button class="generate-btn" onclick="generate()">Load</button>
+</div>
+
+<div class="main" id="output">
+  <div class="empty-state">↑ Select a completed project to open its retrospective</div>
+</div>
+
+<script>
+const PROJECTS = [
+  { name: "DFM Review - Enclosure with CM", ws: "Mechanical", lead: "Head of Mechanical", start: "6 Jan 2025", end: "7 Feb 2025", risks: ["R-018: Tooling lead times exceed plan"] },
+  { name: "Final Enclosure Geometry Lock", ws: "Mechanical", lead: "Head of Mechanical", start: "10 Feb 2025", end: "7 Mar 2025", risks: [] },
+  { name: "Biocompatibility Testing (ISO 10993)", ws: "Mechanical", lead: "Head of Mechanical", start: "10 Feb 2025", end: "11 Apr 2025", risks: ["R-004: Biocompatibility failure on enclosure material"] },
+  { name: "Adhesion Patch & Wearability Validation", ws: "Mechanical", lead: "Head of Mechanical", start: "10 Mar 2025", end: "25 Apr 2025", risks: ["R-010: Skin irritation rate exceeds 10% threshold"] },
+  { name: "Tooling Design & Release to Manufacturer", ws: "Mechanical", lead: "Head of Mechanical", start: "28 Apr 2025", end: "30 May 2025", risks: ["R-018: Tooling lead times exceed plan"] },
+  { name: "Yield Improvement DOE", ws: "Manufacturing", lead: "Head of Manufacturing", start: "24 Feb 2025", end: "28 Mar 2025", risks: ["R-003: Sensor membrane deposition yield below 90%"] },
+  { name: "Sensor Membrane Deposition Process Optimisation", ws: "Manufacturing", lead: "Head of Manufacturing", start: "6 Jan 2025", end: "28 Mar 2025", risks: ["R-003: Sensor membrane deposition yield below 90%", "R-015: Manufacturing process not transferable to CM"] },
+  { name: "Pilot Build #3 - 30 Unit Build", ws: "Manufacturing", lead: "Head of Manufacturing", start: "19 May 2025", end: "6 Jun 2025", risks: ["R-012: Insufficient clinical trial units if yield remains low"] },
+  { name: "BLE Stack Stability Resolution", ws: "Systems Software & Electronics", lead: "Head of SSE", start: "6 Jan 2025", end: "14 Feb 2025", risks: ["R-002: BLE stack instability causing data dropouts"] },
+  { name: "PCB Layout Finalisation & Gerber Release", ws: "Systems Software & Electronics", lead: "Head of SSE", start: "17 Feb 2025", end: "14 Mar 2025", risks: ["R-005: PCB manufacturing yield declining at incumbent CM"] },
+  { name: "Embedded Glucose Algorithm Finalisation", ws: "Systems Software & Electronics", lead: "Head of SSE", start: "17 Mar 2025", end: "25 Apr 2025", risks: ["R-007: Glucose algorithm accuracy insufficient vs predicate"] },
+  { name: "IEC 62304 Software Lifecycle Documentation", ws: "Systems Software & Electronics", lead: "Head of SSE", start: "17 Feb 2025", end: "16 May 2025", risks: ["R-014: IEC 62304 documentation incomplete at Design Freeze"] },
+  { name: "Enzyme Formulation Optimisation", ws: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "6 Jan 2025", end: "14 Mar 2025", risks: ["R-001: Enzyme stability insufficient for 14-day wear"] },
+  { name: "14-Day Wear Stability Study", ws: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "7 Apr 2025", end: "9 May 2025", risks: ["R-001: Enzyme stability insufficient for 14-day wear at 37°C"] },
+  { name: "Lot-to-Lot Variability Study", ws: "Biology & Chemistry", lead: "Head of Biology & Chemistry", start: "24 Feb 2025", end: "4 Apr 2025", risks: ["R-013: Lot-to-lot variability exceeds specification"] },
+  { name: "Design History File (DHF) Gap Analysis & Closure", ws: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "6 Jan 2025", end: "25 Apr 2025", risks: ["R-008: DHF incomplete at Design Freeze gate"] },
+  { name: "Design Verification Plan Approval", ws: "Regulatory & Quality", lead: "Head of Regulatory & Quality", start: "28 Apr 2025", end: "23 May 2025", risks: [] },
+  { name: "CRO Selection & Contract Execution", ws: "Clinical", lead: "Head of Clinical", start: "6 Jan 2025", end: "14 Feb 2025", risks: [] },
+  { name: "IRB / Ethics Committee Submission", ws: "Clinical", lead: "Head of Clinical", start: "17 Mar 2025", end: "25 Apr 2025", risks: ["R-017: IRB submission delayed due to incomplete protocol"] },
+  { name: "Investigator Training Programme", ws: "Clinical", lead: "Head of Clinical", start: "9 Jun 2025", end: "20 Jun 2025", risks: ["R-009: Clinical site initiation delayed beyond Design Freeze"] },
+];
+
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const today = new Date();
+const pad = n => String(n).padStart(2,'0');
+document.getElementById('retro-date').value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+let actionCount = 3;
+
+function addAction() {
+  actionCount++;
+  const table = document.getElementById('actions-table');
+  const row = document.createElement('div');
+  row.className = 'action-row';
+  row.innerHTML = `
+    <input class="action-input" placeholder="Describe the action..." />
+    <select class="action-select">
+      <option>Head of Mechanical</option>
+      <option>Head of SSE</option>
+      <option>Head of Manufacturing</option>
+      <option>Head of Biology & Chemistry</option>
+      <option>Head of Regulatory & Quality</option>
+      <option>Head of Clinical</option>
+      <option>Programme Lead</option>
+    </select>
+    <input type="date" class="action-select" style="width:100%" />
+    <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+  `;
+  table.appendChild(row);
+}
+
+function generate() {
+  const idx = document.getElementById('project-select').value;
+  const facilitator = document.getElementById('facilitator').value || 'Project Lead';
+  const retroDateVal = document.getElementById('retro-date').value;
+  if (idx === '') return;
+
+  const p = PROJECTS[parseInt(idx)];
+  const retroDateFormatted = retroDateVal ? new Date(retroDateVal).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'TBC';
+
+  const html = `
+    <div class="project-hero">
+      <div>
+        <div class="project-ws-tag">${p.ws} · Project Retrospective</div>
+        <div class="project-title">${p.name}</div>
+        <div class="meta-row">
+          <div class="meta-item">Lead: <span>${p.lead}</span></div>
+          <div class="meta-item">Start: <span>${p.start}</span></div>
+          <div class="meta-item">Completed: <span>${p.end}</span></div>
+          <div class="meta-item">Retro: <span>${retroDateFormatted}</span></div>
+          <div class="meta-item">Facilitated by: <span>${facilitator}</span></div>
+        </div>
+      </div>
+      <div class="delivery-badge on-time">✓ Completed</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent)">${p.risks.length}</div>
+        <div class="stat-label">Risks Logged</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green)">All</div>
+        <div class="stat-label">Risks Resolved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green)">Done</div>
+        <div class="stat-label">Status</div>
+      </div>
+    </div>
+
+    <div class="retro-grid">
+      <div class="retro-card positive">
+        <div class="retro-card-title">✅ What went well</div>
+        <textarea class="retro-textarea" placeholder="What worked well on this project?&#10;What should we replicate on future projects?&#10;Any standout contributions or decisions?"></textarea>
+      </div>
+      <div class="retro-card negative">
+        <div class="retro-card-title">❌ What didn't work</div>
+        <textarea class="retro-textarea" placeholder="What slowed the project down?&#10;What would you do differently?&#10;Any decisions you'd change in hindsight?"></textarea>
+      </div>
+      <div class="retro-card learning">
+        <div class="retro-card-title">💡 Technical learnings</div>
+        <textarea class="retro-textarea" placeholder="What did we learn technically or scientifically?&#10;Any unexpected findings?&#10;What knowledge should be documented?"></textarea>
+      </div>
+      <div class="retro-card process">
+        <div class="retro-card-title">⚙️ Process improvements</div>
+        <textarea class="retro-textarea" placeholder="How could we run this project more efficiently?&#10;Any tools or processes to improve?&#10;What should we change for the next stage?"></textarea>
+      </div>
+    </div>
+
+    ${p.risks.length > 0 ? `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Risk Review — How did our risks play out?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:12px;padding:0 16px 8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)">
+        <div>Risk</div><div>Outcome</div><div>Note</div>
+      </div>
+      ${p.risks.map(r => `
+        <div class="risk-row">
+          <div>
+            <div class="risk-name">${r.split(': ')[1] || r}</div>
+            <div class="risk-id">${r.split(':')[0]}</div>
+          </div>
+          <select class="risk-outcome-select">
+            <option>Mitigated successfully</option>
+            <option>Realised — impacted project</option>
+            <option>Accepted — no action needed</option>
+            <option>No impact in the end</option>
+          </select>
+          <textarea class="risk-note" placeholder="Brief outcome note..."></textarea>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Actions Raised</div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;padding:0 16px 8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)">
+        <div>Action</div><div>Owner</div><div>Due Date</div><div></div>
+      </div>
+      <div id="actions-table">
+        ${[1,2,3].map(() => `
+          <div class="action-row">
+            <input class="action-input" placeholder="Describe the action..." />
+            <select class="action-select">
+              <option>Head of Mechanical</option>
+              <option>Head of SSE</option>
+              <option>Head of Manufacturing</option>
+              <option>Head of Biology & Chemistry</option>
+              <option>Head of Regulatory & Quality</option>
+              <option>Head of Clinical</option>
+              <option>Programme Lead</option>
+            </select>
+            <input type="date" class="action-select" style="width:100%" />
+            <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="add-btn" onclick="addAction()">+ Add Action</button>
+    </div>
+
+    <div class="share-box">
+      <div class="share-label">📤 Key findings to share with other workstreams</div>
+      <textarea class="share-textarea" placeholder="What learnings from this project are relevant to other teams?&#10;What should be shared at the next cross-team sync?"></textarea>
+    </div>
+  `;
+
+  document.getElementById('output').innerHTML = html;
+}
+</script>
+</body>
+</html>
