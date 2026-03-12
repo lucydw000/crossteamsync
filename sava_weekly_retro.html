@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Weekly Retrospective</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --accent-dim: #1a2a4a;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --purple: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .controls {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .control-group label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .control-group input,
+  .control-group select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .control-group input:focus,
+  .control-group select:focus { border-color: var(--accent); }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .generate-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .generate-btn:hover { opacity: 0.85; }
+
+  .print-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .main { padding: 32px; max-width: 1100px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* HEADER ROW */
+  .retro-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .retro-title { font-size: 22px; font-weight: 600; }
+
+  .retro-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SECTION */
+  .section { margin-bottom: 36px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* WORKSTREAM RETRO CARDS */
+  .ws-retro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .ws-retro-card:hover { border-color: var(--border-light); }
+
+  .ws-retro-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .ws-retro-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .ws-retro-lead {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .rag-selector {
+    display: flex;
+    gap: 6px;
+  }
+
+  .rag-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .rag-btn:hover { border-color: var(--text-muted); }
+  .rag-btn.rag-green { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+  .rag-btn.rag-amber { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+  .rag-btn.rag-red { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+  .ws-retro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .retro-col { }
+
+  .retro-col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .retro-col-label.went-well { color: var(--green); }
+  .retro-col-label.didnt-work { color: var(--red); }
+  .retro-col-label.differently { color: var(--amber); }
+
+  .retro-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 10px 12px;
+    resize: none;
+    outline: none;
+    min-height: 100px;
+    transition: border-color 0.2s;
+  }
+
+  .retro-textarea:focus { border-color: var(--border-light); }
+  .retro-textarea::placeholder { color: var(--text-dim); }
+
+  /* PROGRAMME SUMMARY */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .summary-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .summary-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    min-height: 100px;
+  }
+
+  .summary-textarea::placeholder { color: var(--text-dim); }
+
+  /* ESCALATION */
+  .escalation-box {
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,166,35,0.25);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 32px;
+  }
+
+  .escalation-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+
+  .escalation-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+  }
+
+  .escalation-textarea::placeholder { color: rgba(245,166,35,0.3); }
+
+  /* ACTIONS */
+  .action-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 6px;
+  }
+
+  .action-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+  }
+
+  .action-input::placeholder { color: var(--text-dim); }
+
+  .action-select {
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 5px 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+    appearance: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s;
+  }
+
+  .remove-btn:hover { color: var(--red); }
+
+  .add-btn {
+    background: transparent;
+    border: 1px dashed var(--border-light);
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 6px;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Weekly Retrospective</div>
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)" id="header-date"></div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Week of (Monday)</label>
+    <input type="date" id="week-date" />
+  </div>
+  <div class="control-group">
+    <label>Your Workstream</label>
+    <select id="ws-select">
+      <option value="">— Select your workstream —</option>
+      <option value="0">Mechanical</option>
+      <option value="1">Systems Software & Electronics</option>
+      <option value="2">Manufacturing</option>
+      <option value="3">Biology & Chemistry</option>
+      <option value="4">Regulatory & Quality</option>
+      <option value="5">Clinical</option>
+    </select>
+  </div>
+  <div class="btn-row">
+    <button class="generate-btn" onclick="generate()">Generate</button>
+    <button class="print-btn" onclick="window.print()">Export</button>
+  </div>
+</div>
+
+<div class="main" id="output">
+  <div class="empty-state">↑ Select your workstream and week to open your retrospective</div>
+</div>
+
+<script>
+const WORKSTREAMS = [
+  { name: 'Mechanical', lead: 'Head of Mechanical' },
+  { name: 'Systems Software & Electronics', lead: 'Head of SSE' },
+  { name: 'Manufacturing', lead: 'Head of Manufacturing' },
+  { name: 'Biology & Chemistry', lead: 'Head of Biology & Chemistry' },
+  { name: 'Regulatory & Quality', lead: 'Head of Regulatory & Quality' },
+  { name: 'Clinical', lead: 'Head of Clinical' },
+];
+
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const today = new Date();
+const day = today.getDay();
+const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+today.setDate(diff);
+const pad = n => String(n).padStart(2,'0');
+document.getElementById('week-date').value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+let actionCount = 3;
+
+function setRag(colour) {
+  ['green','amber','red'].forEach(c => {
+    document.getElementById(`rag-${c}`)?.classList.remove(`rag-${c}`);
+  });
+  document.getElementById(`rag-${colour}`)?.classList.add(`rag-${colour}`);
+}
+
+function addAction(lead) {
+  actionCount++;
+  const table = document.getElementById('actions-table');
+  const row = document.createElement('div');
+  row.className = 'action-row';
+  row.innerHTML = `
+    <input class="action-input" placeholder="Describe the action..." />
+    <input class="action-select" style="width:100%" value="${lead}" />
+    <input type="date" class="action-select" style="width:100%" />
+    <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+  `;
+  table.appendChild(row);
+}
+
+function formatDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function formatEnd(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  const end = new Date(y,m-1,d+4);
+  return end.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function generate() {
+  const dateVal = document.getElementById('week-date').value;
+  const wsIdx = document.getElementById('ws-select').value;
+  if (!dateVal || wsIdx === '') return;
+
+  const ws = WORKSTREAMS[parseInt(wsIdx)];
+
+  const html = `
+    <div class="retro-header">
+      <div>
+        <div class="retro-title">${ws.name}</div>
+        <div class="retro-subtitle" style="margin-top:6px">Weekly Retrospective · ${formatDate(dateVal)} — ${formatEnd(dateVal)}</div>
+        <div class="retro-subtitle" style="margin-top:2px">${ws.lead}</div>
+      </div>
+      <div class="rag-selector" style="align-self:center">
+        <button class="rag-btn" id="rag-green" onclick="setRag('green')">🟢 Green</button>
+        <button class="rag-btn" id="rag-amber" onclick="setRag('amber')">🟡 Amber</button>
+        <button class="rag-btn" id="rag-red" onclick="setRag('red')">🔴 Red</button>
+      </div>
+    </div>
+
+    <div class="ws-retro-grid" style="margin-bottom:28px">
+      <div class="retro-col">
+        <div class="retro-col-label went-well">✓ What went well</div>
+        <textarea class="retro-textarea" style="min-height:200px" placeholder="What worked well this week?&#10;&#10;Any wins to celebrate?&#10;What should we keep doing?"></textarea>
+      </div>
+      <div class="retro-col">
+        <div class="retro-col-label didnt-work">✕ What didn't go well</div>
+        <textarea class="retro-textarea" style="min-height:200px" placeholder="What was difficult or frustrating?&#10;&#10;Any blockers or setbacks?&#10;What slowed us down?"></textarea>
+      </div>
+      <div class="retro-col">
+        <div class="retro-col-label differently">→ Do differently next week</div>
+        <textarea class="retro-textarea" style="min-height:200px" placeholder="What will we change?&#10;&#10;Any process or approach improvements?&#10;What are we committing to?"></textarea>
+      </div>
+    </div>
+
+    <div class="escalation-box">
+      <div class="escalation-label">⚠️ Escalations to programme lead / co-founders</div>
+      <textarea class="escalation-textarea" placeholder="Any issues that need escalating beyond this workstream?&#10;Be specific: what is the issue, what do you need, by when?"></textarea>
+    </div>
+
+    <div class="section" style="margin-top:28px">
+      <div class="section-header">
+        <div class="section-label">Actions</div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;padding:0 16px 8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)">
+        <div>Action</div><div>Owner</div><div>Due</div><div></div>
+      </div>
+      <div id="actions-table">
+        ${[1,2,3].map(() => `
+          <div class="action-row">
+            <input class="action-input" placeholder="Describe the action..." />
+            <input class="action-select" style="width:100%" placeholder="${ws.lead}" value="${ws.lead}" />
+            <input type="date" class="action-select" style="width:100%" />
+            <button class="remove-btn" onclick="this.closest('.action-row').remove()">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="add-btn" onclick="addAction('${ws.lead}')">+ Add Action</button>
+    </div>
+  `;
+
+  document.getElementById('output').innerHTML = html;
+}
+</script>
+</body>
+</html>
