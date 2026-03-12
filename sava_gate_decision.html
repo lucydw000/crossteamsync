@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Gate Decision Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --accent-dim: #1a2a4a;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --purple: #a78bfa;
+    --purple-dim: #1e1a3a;
+    --gold: #f0c040;
+    --gold-dim: #2a1f00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--gold); }
+
+  .controls {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .control-group label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .control-group select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .control-group select:focus { border-color: var(--gold); }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .generate-btn {
+    background: var(--gold);
+    color: #0a0a0f;
+    border: none;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .generate-btn:hover { opacity: 0.85; }
+
+  .print-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .print-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .main { padding: 32px; max-width: 1100px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* GATE HERO */
+  .gate-hero {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .gate-hero.design-freeze {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, var(--surface) 60%, var(--gold-dim));
+  }
+
+  .gate-type-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .gate-name {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .gate-name.freeze { color: var(--gold); }
+
+  .gate-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .gate-decision-display {
+    text-align: right;
+  }
+
+  .decision-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .decision-badge {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .decision-go { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+  .decision-conditional { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .decision-no-go { background: var(--red-dim); color: var(--red); border: 1px solid rgba(240,79,79,0.2); }
+  .decision-pending { background: var(--border); color: var(--text-muted); border: 1px solid var(--border-light); }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom: 36px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* READINESS CRITERIA */
+  .criteria-grid { display: grid; gap: 8px; }
+
+  .criteria-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+
+  .criteria-row:hover { border-color: var(--border-light); }
+
+  .criteria-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .criteria-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .criteria-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .criteria-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+    color: #0a0a0f;
+    font-weight: 700;
+  }
+
+  .criteria-check:hover { border-color: var(--green); }
+
+  /* PROJECTS TABLE */
+  .projects-table { display: grid; gap: 6px; }
+
+  .project-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .project-name { font-size: 13px; font-weight: 500; }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .status-done { background: var(--green-dim); color: var(--green); }
+  .status-progress { background: var(--accent-dim); color: var(--accent); }
+  .status-not-started { background: var(--border); color: var(--text-muted); }
+  .status-at-risk { background: var(--red-dim); color: var(--red); }
+
+  .project-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .workstream-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* RISKS */
+  .risk-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .risk-name { font-size: 13px; color: var(--text); }
+  .risk-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+  .priority-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .p-critical { background: var(--red-dim); color: var(--red); }
+  .p-high { background: var(--amber-dim); color: var(--amber); }
+  .p-medium { background: var(--accent-dim); color: var(--accent); }
+  .p-low { background: var(--green-dim); color: var(--green); }
+
+  /* DECISION PANEL */
+  .decision-panel {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .decision-panel h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .decision-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .decision-option {
+    padding: 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .decision-option:hover { border-color: var(--border-light); }
+  .decision-option.selected-go { border-color: var(--green); background: var(--green-dim); }
+  .decision-option.selected-conditional { border-color: var(--amber); background: var(--amber-dim); }
+  .decision-option.selected-nogo { border-color: var(--red); background: var(--red-dim); }
+  .decision-option.selected-deferred { border-color: var(--purple); background: var(--purple-dim); }
+
+  .decision-option-icon { font-size: 20px; margin-bottom: 6px; }
+  .decision-option-label { font-size: 12px; font-weight: 600; }
+  .decision-option-desc { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+  .decision-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .field-group label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .field-group input,
+  .field-group textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field-group textarea { resize: none; min-height: 80px; line-height: 1.6; }
+  .field-group input:focus,
+  .field-group textarea:focus { border-color: var(--gold); }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 4px;
+    height: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--green);
+    transition: width 0.3s ease;
+  }
+
+  .criteria-progress {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Gate Decision Review</div>
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)" id="header-date"></div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Select Milestone Gate</label>
+    <select id="milestone-select">
+      <option value="">— Choose a gate —</option>
+      <option value="0">🔒 Mechanical Design Freeze — 2 June 2025</option>
+      <option value="1">🔒 Electronics & Firmware Design Freeze — 19 May 2025</option>
+      <option value="2">🔒 App Design Freeze — 14 April 2025</option>
+      <option value="3">🔒 Chemistry & Biology Design Freeze — 19 May 2025</option>
+      <option value="4">🔒 Manufacturing Pilot Build Complete — 9 June 2025</option>
+      <option value="5">🔒 DHF & Regulatory Readiness — 26 May 2025</option>
+      <option value="6">🔒 DESIGN FREEZE — 27 June 2025</option>
+      <option value="7">🔒 Clinical Trial Readiness — 25 July 2025</option>
+    </select>
+  </div>
+  <div class="btn-row">
+    <button class="generate-btn" onclick="generateGate()">Load Gate</button>
+    <button class="print-btn" onclick="window.print()">Export</button>
+  </div>
+</div>
+
+<div class="main" id="output">
+  <div class="empty-state">↑ Select a gate to load the decision review pack</div>
+</div>
+
+<script>
+const MILESTONES = [
+  {
+    name: "Mechanical Design Freeze",
+    workstream: "Mechanical",
+    target: "2 June 2025",
+    gateType: "Stage Gate",
+    decision: "Go",
+    decisionDate: "2 June 2025",
+    decisionBy: "Head of Mechanical, CTO",
+    criteria: [
+      "Enclosure geometry locked and drawing pack released to CM",
+      "Biocompatibility confirmed per ISO 10993 with no failures",
+      "Skin irritation rate <10% in wearability study",
+      "IP67 rating confirmed by independent test",
+      "Mechanical durability testing passed",
+      "Tooling released to manufacturer",
+      "DFM sign-off received from CM"
+    ],
+    projects: [
+      { name: "Final Enclosure Geometry Lock", status: "Done", end: "7 Mar 2025", workstream: "Mechanical" },
+      { name: "IP67 Ingress Protection Testing", status: "Done", end: "28 Mar 2025", workstream: "Mechanical" },
+      { name: "Mechanical Durability & Drop Testing", status: "Done", end: "28 Mar 2025", workstream: "Mechanical" },
+      { name: "Biocompatibility Testing (ISO 10993)", status: "Done", end: "11 Apr 2025", workstream: "Mechanical" },
+      { name: "Adhesion Patch & Wearability Validation", status: "Done", end: "25 Apr 2025", workstream: "Mechanical" },
+      { name: "Tooling Design & Release to Manufacturer", status: "Done", end: "30 May 2025", workstream: "Mechanical" },
+    ],
+    risks: [
+      { id: "R-004", name: "Biocompatibility failure on primary enclosure material", priority: 10, indicator: "🟠 High", status: "Closed" },
+      { id: "R-010", name: "Skin irritation rate exceeds 10% threshold in wearability study", priority: 9, indicator: "🟡 Medium", status: "Closed" },
+      { id: "R-018", name: "Tooling lead times exceed plan", priority: 6, indicator: "🟢 Low", status: "Closed" },
+    ]
+  },
+  {
+    name: "Electronics & Firmware Design Freeze",
+    workstream: "Systems Software & Electronics",
+    target: "19 May 2025",
+    gateType: "Stage Gate",
+    decision: "Conditional Go",
+    decisionDate: "19 May 2025",
+    decisionBy: "Head of SSE, CTO, Head of Regulatory & Quality",
+    criteria: [
+      "PCB layout frozen and Gerbers released",
+      "BLE stable over 72hr continuous stress test with zero dropouts",
+      "Power consumption meets battery life spec across all modes",
+      "BLE antenna performance validated across operating environments",
+      "PCB yield ≥95% at qualified manufacturer",
+      "Embedded algorithm meets ISO 15197 accuracy criteria",
+      "Cybersecurity assessment complete",
+      "IEC 62304 documentation complete and QA signed off"
+    ],
+    projects: [
+      { name: "PCB Layout Finalisation & Gerber Release", status: "Done", end: "14 Mar 2025", workstream: "SSE" },
+      { name: "BLE Stack Stability Resolution", status: "Done", end: "14 Feb 2025", workstream: "SSE" },
+      { name: "BLE Antenna Placement & Performance Validation", status: "Done", end: "4 Apr 2025", workstream: "SSE" },
+      { name: "Power Consumption Optimisation", status: "Done", end: "14 Feb 2025", workstream: "SSE" },
+      { name: "PCB Supplier Qualification", status: "Done", end: "11 Apr 2025", workstream: "SSE" },
+      { name: "Embedded Glucose Algorithm Finalisation", status: "Done", end: "25 Apr 2025", workstream: "SSE" },
+      { name: "Cybersecurity Threat Assessment", status: "Done", end: "9 May 2025", workstream: "SSE" },
+      { name: "IEC 62304 Software Lifecycle Documentation", status: "Done", end: "16 May 2025", workstream: "SSE" },
+    ],
+    risks: [
+      { id: "R-002", name: "BLE stack instability causing intermittent data dropouts", priority: 12, indicator: "🟠 High", status: "Closed" },
+      { id: "R-005", name: "PCB manufacturing yield declining at incumbent CM", priority: 9, indicator: "🟡 Medium", status: "Closed" },
+      { id: "R-007", name: "Glucose algorithm accuracy insufficient vs predicate device", priority: 15, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-014", name: "IEC 62304 documentation incomplete at Design Freeze", priority: 8, indicator: "🟡 Medium", status: "Closed" },
+      { id: "R-019", name: "Cybersecurity vulnerability in BLE communication layer", priority: 8, indicator: "🟡 Medium", status: "Closed" },
+    ]
+  },
+  {
+    name: "App Design Freeze",
+    workstream: "Systems Software & Electronics",
+    target: "14 April 2025",
+    gateType: "Internal Review",
+    decision: "Go",
+    decisionDate: "14 April 2025",
+    decisionBy: "Head of SSE, CTO",
+    criteria: [
+      "All P1 and P2 bugs resolved — zero open critical defects",
+      "iOS and Android compatibility confirmed on latest two OS versions",
+      "Formative usability study passed with ≥80% task completion rate",
+      "App-firmware regression suite fully passing",
+      "App store submission requirements reviewed and met"
+    ],
+    projects: [
+      { name: "iOS & Android App Feature Completion", status: "Done", end: "28 Feb 2025", workstream: "SSE" },
+      { name: "App Regression Test Suite Completion", status: "Done", end: "21 Mar 2025", workstream: "SSE" },
+      { name: "App Usability Study (Formative)", status: "Done", end: "11 Apr 2025", workstream: "SSE" },
+      { name: "App-Firmware Interface Specification Lock", status: "Done", end: "7 Feb 2025", workstream: "SSE" },
+    ],
+    risks: [
+      { id: "R-006", name: "App-firmware interface breaks on new iOS or Android OS update", priority: 6, indicator: "🟢 Low", status: "Closed" },
+    ]
+  },
+  {
+    name: "Chemistry & Biology Design Freeze",
+    workstream: "Biology & Chemistry",
+    target: "19 May 2025",
+    gateType: "Stage Gate",
+    decision: "Conditional Go",
+    decisionDate: "19 May 2025",
+    decisionBy: "Head of Biology & Chemistry, CTO, Head of Regulatory & Quality",
+    criteria: [
+      "Enzyme formulation locked — no further changes permitted post-freeze",
+      "14-day stability data package complete at 37°C",
+      "Accelerated ageing data supports 12-month shelf life claim",
+      "Sensor accuracy meets ISO 15197: ≥95% of readings within ±15mg/dL or 15%",
+      "Selectivity confirmed vs acetaminophen, ascorbic acid, uric acid and other key interferents",
+      "Lot-to-lot variability within defined spec",
+      "All raw material suppliers approved and audited"
+    ],
+    projects: [
+      { name: "Enzyme Formulation Optimisation", status: "Done", end: "14 Mar 2025", workstream: "Bio & Chem" },
+      { name: "Membrane Crosslinking Process Lock", status: "Done", end: "4 Apr 2025", workstream: "Bio & Chem" },
+      { name: "14-Day Wear Stability Study", status: "Done", end: "9 May 2025", workstream: "Bio & Chem" },
+      { name: "Accelerated Ageing & Shelf Life Study", status: "Done", end: "16 May 2025", workstream: "Bio & Chem" },
+      { name: "Sensor Selectivity Testing vs Interferents", status: "Done", end: "28 Feb 2025", workstream: "Bio & Chem" },
+      { name: "Lot-to-Lot Variability Study", status: "Done", end: "4 Apr 2025", workstream: "Bio & Chem" },
+      { name: "Raw Material Supplier Approval", status: "Done", end: "4 Apr 2025", workstream: "Bio & Chem" },
+      { name: "Benchtop Accuracy Study (vs YSI reference)", status: "Done", end: "14 Mar 2025", workstream: "Bio & Chem" },
+    ],
+    risks: [
+      { id: "R-001", name: "Enzyme stability insufficient for 14-day wear at 37°C", priority: 20, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-011", name: "Sensor cross-reactivity with common interferents", priority: 12, indicator: "🟠 High", status: "Closed" },
+      { id: "R-013", name: "Lot-to-lot variability exceeds specification", priority: 12, indicator: "🟠 High", status: "Closed" },
+      { id: "R-020", name: "Accelerated ageing data insufficient for 12-month shelf life claim", priority: 6, indicator: "🟢 Low", status: "Mitigating" },
+    ]
+  },
+  {
+    name: "Manufacturing Pilot Build Complete",
+    workstream: "Manufacturing",
+    target: "9 June 2025",
+    gateType: "Stage Gate",
+    decision: "Go",
+    decisionDate: "9 June 2025",
+    decisionBy: "Head of Manufacturing, CTO",
+    criteria: [
+      "30 units built to current design specification",
+      "Sensor membrane deposition yield ≥90%",
+      "Full assembly cycle time within target",
+      "All SOPs documented and CM-reviewed",
+      "Equipment IQ/OQ complete",
+      "Units inspected and available for design verification testing",
+      "Clinical trial supply quantity confirmed"
+    ],
+    projects: [
+      { name: "Sensor Membrane Deposition Process Optimisation", status: "Done", end: "28 Mar 2025", workstream: "Manufacturing" },
+      { name: "Yield Improvement DOE", status: "Done", end: "28 Mar 2025", workstream: "Manufacturing" },
+      { name: "Assembly Process Documentation & SOPs", status: "Done", end: "25 Apr 2025", workstream: "Manufacturing" },
+      { name: "Equipment Qualification (IQ/OQ)", status: "Done", end: "16 May 2025", workstream: "Manufacturing" },
+      { name: "CM Supplier Qualification Audit", status: "Done", end: "7 Mar 2025", workstream: "Manufacturing" },
+      { name: "Pilot Build #3 - 30 Unit Build", status: "Done", end: "6 Jun 2025", workstream: "Manufacturing" },
+    ],
+    risks: [
+      { id: "R-003", name: "Sensor membrane deposition yield below 90% target", priority: 16, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-012", name: "Insufficient clinical trial units if yield remains below target", priority: 12, indicator: "🟠 High", status: "Closed" },
+      { id: "R-015", name: "Manufacturing process not transferable to CM at scale", priority: 12, indicator: "🟠 High", status: "Closed" },
+    ]
+  },
+  {
+    name: "DHF & Regulatory Readiness",
+    workstream: "Regulatory & Quality",
+    target: "26 May 2025",
+    gateType: "Stage Gate",
+    decision: "Go",
+    decisionDate: "26 May 2025",
+    decisionBy: "Head of Regulatory & Quality, CTO",
+    criteria: [
+      "DHF ≥95% complete across all sections with owner sign-off",
+      "Risk Management File reviewed and approved per ISO 14971",
+      "All open CAPAs resolved or formally risk-accepted with documented rationale",
+      "Design Verification Plan reviewed and approved by QA and CTO",
+      "Supplier audit programme complete for all critical suppliers",
+      "Regulatory strategy confirmed for CE mark and FDA pathways",
+      "Essential requirements checklist complete",
+      "Post-market surveillance plan drafted"
+    ],
+    projects: [
+      { name: "Design History File (DHF) Gap Analysis & Closure", status: "Done", end: "25 Apr 2025", workstream: "Reg & Quality" },
+      { name: "Risk Management File Update (ISO 14971)", status: "Done", end: "25 Apr 2025", workstream: "Reg & Quality" },
+      { name: "Design Verification Plan Approval", status: "Done", end: "23 May 2025", workstream: "Reg & Quality" },
+      { name: "CAPA Log Review & Closure", status: "Done", end: "14 Mar 2025", workstream: "Reg & Quality" },
+      { name: "Supplier Audit Programme", status: "Done", end: "28 Mar 2025", workstream: "Reg & Quality" },
+      { name: "Regulatory Strategy Document (CE/FDA)", status: "Done", end: "11 Apr 2025", workstream: "Reg & Quality" },
+      { name: "Essential Requirements / Performance Checklist", status: "Done", end: "9 May 2025", workstream: "Reg & Quality" },
+      { name: "Post-Market Surveillance Plan", status: "Done", end: "23 May 2025", workstream: "Reg & Quality" },
+    ],
+    risks: [
+      { id: "R-008", name: "DHF incomplete at Design Freeze gate", priority: 15, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-016", name: "Regulatory pathway uncertainty between FDA De Novo and 510k", priority: 10, indicator: "🟠 High", status: "Closed" },
+      { id: "R-017", name: "IRB submission delayed due to incomplete clinical protocol", priority: 8, indicator: "🟡 Medium", status: "Closed" },
+    ]
+  },
+  {
+    name: "DESIGN FREEZE",
+    workstream: "All Workstreams",
+    target: "27 June 2025",
+    gateType: "Design Freeze",
+    decision: "Go",
+    decisionDate: "27 June 2025",
+    decisionBy: "All Department Heads, Co-founders",
+    criteria: [
+      "All six workstream-level design freezes complete and signed off by department heads",
+      "Zero open critical risks (priority score ≥15) without active mitigation plan",
+      "DHF ≥95% complete and signed off by Head of Regulatory & Quality",
+      "Design Verification Plan approved — verification testing ready to commence",
+      "Manufacturing pilot build complete with yield ≥90%",
+      "Regulatory strategy confirmed for target markets",
+      "Clinical trial protocol finalised and IRB submission made",
+      "Formal Go/No-Go review held with all department heads and both co-founders present",
+      "All conditional items from upstream gates resolved or formally risk-accepted with documented rationale and named owners"
+    ],
+    projects: [
+      { name: "Mechanical Design Freeze ✓", status: "Done", end: "2 Jun 2025", workstream: "Mechanical" },
+      { name: "Electronics & Firmware Design Freeze ✓", status: "Done", end: "19 May 2025", workstream: "SSE" },
+      { name: "App Design Freeze ✓", status: "Done", end: "14 Apr 2025", workstream: "SSE" },
+      { name: "Chemistry & Biology Design Freeze ✓", status: "Done", end: "19 May 2025", workstream: "Bio & Chem" },
+      { name: "Manufacturing Pilot Build Complete ✓", status: "Done", end: "9 Jun 2025", workstream: "Manufacturing" },
+      { name: "DHF & Regulatory Readiness ✓", status: "Done", end: "26 May 2025", workstream: "Reg & Quality" },
+      { name: "Clinical Protocol Development & Finalisation", status: "Done", end: "14 Mar 2025", workstream: "Clinical" },
+      { name: "IRB / Ethics Committee Submission", status: "Done", end: "25 Apr 2025", workstream: "Clinical" },
+    ],
+    risks: [
+      { id: "R-001", name: "Enzyme stability insufficient for 14-day wear at 37°C", priority: 20, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-007", name: "Glucose algorithm accuracy insufficient vs predicate device", priority: 15, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-008", name: "DHF incomplete at Design Freeze gate", priority: 15, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-003", name: "Sensor membrane deposition yield below 90% target", priority: 16, indicator: "🔴 Critical", status: "Closed" },
+      { id: "R-020", name: "Accelerated ageing data insufficient for 12-month shelf life claim", priority: 6, indicator: "🟢 Low", status: "Mitigating" },
+    ]
+  },
+  {
+    name: "Clinical Trial Readiness",
+    workstream: "Clinical",
+    target: "25 July 2025",
+    gateType: "Stage Gate",
+    decision: "Go",
+    decisionDate: "25 July 2025",
+    decisionBy: "Head of Clinical, Co-founders",
+    criteria: [
+      "IRB / ethics approval received at both clinical sites",
+      "Both sites fully initiated and investigators trained and certified",
+      "CRFs validated and data management system live and tested",
+      "IP labelled, packaged and physically shipped to sites",
+      "SAE reporting and pharmacovigilance process tested end-to-end",
+      "Design Freeze confirmed — no device changes permitted during trial",
+      "Clinical supply confirmed as sufficient for full trial population"
+    ],
+    projects: [
+      { name: "IRB / Ethics Committee Submission", status: "Done", end: "25 Apr 2025", workstream: "Clinical" },
+      { name: "CRF & Data Collection Tool Development", status: "Done", end: "11 Apr 2025", workstream: "Clinical" },
+      { name: "SAE Reporting & Pharmacovigilance Process", status: "Done", end: "2 May 2025", workstream: "Clinical" },
+      { name: "Site Selection & Initiation (Site 1)", status: "Done", end: "30 May 2025", workstream: "Clinical" },
+      { name: "Site Selection & Initiation (Site 2)", status: "Done", end: "6 Jun 2025", workstream: "Clinical" },
+      { name: "Investigator Training Programme", status: "Done", end: "20 Jun 2025", workstream: "Clinical" },
+      { name: "IP Labelling & Packaging for Trial", status: "Done", end: "27 Jun 2025", workstream: "Clinical" },
+    ],
+    risks: [
+      { id: "R-009", name: "Clinical site initiation delayed beyond Design Freeze", priority: 12, indicator: "🟠 High", status: "Closed" },
+      { id: "R-017", name: "IRB submission delayed due to incomplete clinical protocol", priority: 8, indicator: "🟡 Medium", status: "Closed" },
+    ]
+  }
+];
+
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+let checkedCriteria = {};
+
+function decisionClass(d) {
+  if (d === 'Go') return 'decision-go';
+  if (d === 'Conditional Go') return 'decision-conditional';
+  if (d === 'No-Go') return 'decision-no-go';
+  return 'decision-pending';
+}
+
+function statusClass(s) {
+  if (s === 'Done') return 'status-done';
+  if (s === 'In Progress') return 'status-progress';
+  if (s === 'At Risk') return 'status-at-risk';
+  return 'status-not-started';
+}
+
+function priorityClass(p) {
+  if (p >= 15) return 'p-critical';
+  if (p >= 10) return 'p-high';
+  if (p >= 6) return 'p-medium';
+  return 'p-low';
+}
+
+function toggleCriteria(gateIdx, criteriaIdx) {
+  const key = `${gateIdx}-${criteriaIdx}`;
+  checkedCriteria[key] = !checkedCriteria[key];
+  const el = document.getElementById(`check-${gateIdx}-${criteriaIdx}`);
+  if (checkedCriteria[key]) {
+    el.classList.add('checked');
+    el.textContent = '✓';
+  } else {
+    el.classList.remove('checked');
+    el.textContent = '';
+  }
+  updateProgress(gateIdx);
+}
+
+function updateProgress(gateIdx) {
+  const m = MILESTONES[gateIdx];
+  const total = m.criteria.length;
+  let checked = 0;
+  for (let i = 0; i < total; i++) {
+    if (checkedCriteria[`${gateIdx}-${i}`]) checked++;
+  }
+  const pct = Math.round((checked / total) * 100);
+  const fill = document.getElementById(`progress-fill-${gateIdx}`);
+  const label = document.getElementById(`progress-label-${gateIdx}`);
+  if (fill) fill.style.width = pct + '%';
+  if (label) label.textContent = `${checked} of ${total} criteria met`;
+}
+
+function generateGate() {
+  const idx = document.getElementById('milestone-select').value;
+  if (idx === '') return;
+  const m = MILESTONES[parseInt(idx)];
+  const isFreeze = m.name === 'DESIGN FREEZE';
+  const doneProjects = m.projects.filter(p => p.status === 'Done').length;
+  const openRisks = m.risks.filter(r => r.status !== 'Closed').length;
+  const criticalRisks = m.risks.filter(r => r.priority >= 15 && r.status !== 'Closed').length;
+
+  let html = `
+    <div class="gate-hero ${isFreeze ? 'design-freeze' : ''}">
+      <div>
+        <div class="gate-type-badge">${m.gateType} · ${m.workstream}</div>
+        <div class="gate-name ${isFreeze ? 'freeze' : ''}">${isFreeze ? '🔒 ' : ''}${m.name}</div>
+        <div class="gate-date">Decision Date: ${m.target} · ${m.decisionBy}</div>
+      </div>
+      <div class="gate-decision-display">
+        <div class="decision-label">Gate Decision</div>
+        <div class="decision-badge ${decisionClass(m.decision)}">${m.decision}</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--text)">${m.projects.length}</div>
+        <div class="stat-label">Required Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green)">${doneProjects}</div>
+        <div class="stat-label">Complete</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:${openRisks > 0 ? 'var(--amber)' : 'var(--green)'}">${openRisks}</div>
+        <div class="stat-label">Open Risks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:${criticalRisks > 0 ? 'var(--red)' : 'var(--green)'}">${criticalRisks}</div>
+        <div class="stat-label">Critical Open Risks</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Readiness Criteria</div>
+        <div class="section-count">${m.criteria.length} criteria</div>
+      </div>
+      <div class="criteria-grid">
+        ${m.criteria.map((c, i) => `
+          <div class="criteria-row">
+            <div class="criteria-num">${String(i+1).padStart(2,'0')}</div>
+            <div class="criteria-text">${c}</div>
+            <div class="criteria-check" id="check-${idx}-${i}" onclick="toggleCriteria(${idx}, ${i})"></div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="progress-bar-wrap" style="margin-top:12px;">
+        <div class="progress-bar-fill" id="progress-fill-${idx}" style="width:0%"></div>
+      </div>
+      <div class="criteria-progress" id="progress-label-${idx}">0 of ${m.criteria.length} criteria met</div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Required Projects</div>
+        <div class="section-count">${m.projects.length} projects</div>
+      </div>
+      <div class="projects-table">
+        ${m.projects.map(p => `
+          <div class="project-row">
+            <div class="project-name">${p.name}</div>
+            <div class="workstream-tag">${p.workstream}</div>
+            <div class="project-meta">${p.end}</div>
+            <span class="status-pill ${statusClass(p.status)}">${p.status}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label">Associated Risks</div>
+        <div class="section-count">${m.risks.length} risks</div>
+      </div>
+      ${m.risks.map(r => `
+        <div class="risk-row">
+          <div>
+            <div class="risk-name">${r.name}</div>
+            <div class="risk-id">${r.id}</div>
+          </div>
+          <div class="priority-pill ${priorityClass(r.priority)}">${r.indicator}</div>
+          <span class="status-pill ${r.status === 'Closed' ? 'status-done' : r.status === 'Mitigating' ? 'status-progress' : 'status-not-started'}">${r.status}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="decision-panel">
+      <h3>Gate Decision Record</h3>
+      <div class="decision-options">
+        <div class="decision-option ${m.decision === 'Go' ? 'selected-go' : ''}" onclick="selectDecision(this, 'go')">
+          <div class="decision-option-icon">✅</div>
+          <div class="decision-option-label">Go</div>
+          <div class="decision-option-desc">All criteria met. Programme proceeds.</div>
+        </div>
+        <div class="decision-option ${m.decision === 'Conditional Go' ? 'selected-conditional' : ''}" onclick="selectDecision(this, 'conditional')">
+          <div class="decision-option-icon">⚠️</div>
+          <div class="decision-option-label">Conditional Go</div>
+          <div class="decision-option-desc">Proceeds with named conditions and owners.</div>
+        </div>
+        <div class="decision-option ${m.decision === 'No-Go' ? 'selected-nogo' : ''}" onclick="selectDecision(this, 'nogo')">
+          <div class="decision-option-icon">🔴</div>
+          <div class="decision-option-label">No-Go</div>
+          <div class="decision-option-desc">Not ready. Revised date required.</div>
+        </div>
+        <div class="decision-option" onclick="selectDecision(this, 'deferred')">
+          <div class="decision-option-icon">⏸️</div>
+          <div class="decision-option-label">Deferred</div>
+          <div class="decision-option-desc">Insufficient evidence. Reschedule within 10 days.</div>
+        </div>
+      </div>
+      <div class="decision-fields">
+        <div class="field-group">
+          <label>Decision Made By</label>
+          <input type="text" value="${m.decisionBy}" placeholder="Names and roles..." />
+        </div>
+        <div class="field-group">
+          <label>Decision Date</label>
+          <input type="text" value="${m.target}" placeholder="Date of review..." />
+        </div>
+        <div class="field-group">
+          <label>Rationale</label>
+          <textarea placeholder="Why was this decision made?">${m.decision === 'Conditional Go' ? 'Conditional go granted. Outstanding items logged with owners and resolution dates. All conditions to be resolved before Design Freeze gate.' : m.decision === 'Go' ? 'All readiness criteria met. No open critical risks. Gate passed unanimously.' : ''}</textarea>
+        </div>
+        <div class="field-group">
+          <label>Conditions / Actions (if applicable)</label>
+          <textarea placeholder="List any conditions with owner and resolution date..."></textarea>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('output').innerHTML = html;
+}
+
+function selectDecision(el, type) {
+  const panel = el.closest('.decision-options');
+  panel.querySelectorAll('.decision-option').forEach(o => {
+    o.className = 'decision-option';
+  });
+  el.classList.add(`selected-${type}`);
+}
+</script>
+</body>
+</html>
