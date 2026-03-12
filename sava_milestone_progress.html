@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — Milestone Progress</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border-light: #2a2a3e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a52;
+    --accent: #5b8dee;
+    --green: #3dd68c;
+    --green-dim: #0d2e1f;
+    --amber: #f5a623;
+    --amber-dim: #2e1f0a;
+    --red: #f04f4f;
+    --red-dim: #2e0f0f;
+    --gold: #f0c040;
+    --track: #1e1e2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--gold); }
+
+  .as-of {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* ── PROGRAMME RING ROW ── */
+  .programme-row {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+
+  .prog-ring-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .prog-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .prog-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .prog-pct-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .programme-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .prog-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .prog-stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+
+  .prog-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* ── MILESTONE GRID ── */
+  .milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .ms-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .ms-card:hover { border-color: var(--border-light); }
+
+  .ring-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .ring-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .ms-info { text-align: center; width: 100%; }
+
+  .ms-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .ms-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .ms-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .ms-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-go   { background: var(--green-dim); color: var(--green); }
+  .badge-cgo  { background: var(--amber-dim); color: var(--amber); }
+  .badge-nogo { background: var(--red-dim);   color: var(--red);   }
+  .badge-pend { background: var(--border);    color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>SAVA</span> / Milestone Progress</div>
+  <div class="as-of" id="as-of"></div>
+</div>
+
+<div class="programme-row">
+  <div class="prog-ring-wrap">
+    <svg id="prog-svg" width="100" height="100" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="42" fill="none" stroke="var(--track)" stroke-width="8"/>
+      <circle id="prog-ring" cx="50" cy="50" r="42" fill="none"
+        stroke="var(--gold)" stroke-width="8" stroke-linecap="round"
+        stroke-dasharray="264 264" stroke-dashoffset="264"
+        transform="rotate(-90 50 50)"
+        style="transition:stroke-dashoffset 1.2s ease"/>
+    </svg>
+    <div class="prog-ring-label">
+      <div class="prog-pct" id="prog-pct">0%</div>
+      <div class="prog-pct-sub">Overall</div>
+    </div>
+  </div>
+  <div class="programme-stats" id="prog-stats"></div>
+</div>
+
+<div class="milestones-grid" id="milestones-grid"></div>
+
+<script>
+const MILESTONES = [
+  { name: 'App Design Freeze',                      date: '14 Apr 2025', pct: 100, gate: 'go'  },
+  { name: 'Electronics & Firmware Design Freeze',   date: '19 May 2025', pct: 100, gate: 'cgo' },
+  { name: 'Chemistry & Biology Design Freeze',      date: '19 May 2025', pct: 100, gate: 'cgo' },
+  { name: 'DHF & Regulatory Readiness',             date: '26 May 2025', pct: 100, gate: 'go'  },
+  { name: 'Mechanical Design Freeze',               date: '2 Jun 2025',  pct: 100, gate: 'go'  },
+  { name: 'Manufacturing Pilot Build Complete',     date: '9 Jun 2025',  pct: 100, gate: 'go'  },
+  { name: 'Design Freeze',                          date: '27 Jun 2025', pct: 100, gate: 'go'  },
+  { name: 'Clinical Trial Readiness',               date: '25 Jul 2025', pct: 100, gate: 'go'  },
+];
+
+// ── UPDATE THIS SECTION MANUALLY WHEN NOTION CHANGES ──────────────────
+// pct   = % Completion (0–100)
+// gate  = 'go' | 'cgo' | 'nogo' | 'pending'
+// ──────────────────────────────────────────────────────────────────────
+
+function ringColour(pct, gate) {
+  if (gate === 'go')      return 'var(--green)';
+  if (gate === 'cgo')     return 'var(--amber)';
+  if (gate === 'nogo')    return 'var(--red)';
+  if (pct > 0)            return 'var(--accent)';
+  return 'var(--text-dim)';
+}
+
+function badgeClass(gate) {
+  if (gate === 'go')   return 'badge-go';
+  if (gate === 'cgo')  return 'badge-cgo';
+  if (gate === 'nogo') return 'badge-nogo';
+  return 'badge-pend';
+}
+
+function badgeLabel(gate) {
+  if (gate === 'go')   return '✓ Go';
+  if (gate === 'cgo')  return '⚠ Conditional Go';
+  if (gate === 'nogo') return '✗ No-Go';
+  return '— Pending';
+}
+
+function drawRing(pct, colour, size, sw) {
+  const r = size / 2 - sw / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - pct / 100);
+  const cx = size / 2;
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--track)" stroke-width="${sw}"/>
+      <circle cx="${cx}" cy="${cx}" r="${r}" fill="none"
+        stroke="${colour}" stroke-width="${sw}" stroke-linecap="round"
+        stroke-dasharray="${circ} ${circ}"
+        stroke-dashoffset="${circ}"
+        data-offset="${offset}"
+        transform="rotate(-90 ${cx} ${cx})"
+        style="transition:stroke-dashoffset 1.2s ease"/>
+    </svg>`;
+}
+
+function render() {
+  // As-of date
+  document.getElementById('as-of').textContent =
+    'As of ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Programme ring
+  const avgPct = Math.round(MILESTONES.reduce((s, m) => s + m.pct, 0) / MILESTONES.length);
+  const circ = 2 * Math.PI * 42;
+  setTimeout(() => {
+    document.getElementById('prog-ring').style.strokeDashoffset = circ * (1 - avgPct / 100);
+    document.getElementById('prog-pct').textContent = avgPct + '%';
+  }, 100);
+
+  // Programme stats
+  const go      = MILESTONES.filter(m => m.gate === 'go').length;
+  const cgo     = MILESTONES.filter(m => m.gate === 'cgo').length;
+  const pending = MILESTONES.filter(m => m.gate === 'pending' || !m.gate).length;
+  document.getElementById('prog-stats').innerHTML = `
+    <div class="prog-stat">
+      <div class="prog-stat-value" style="color:var(--green)">${go}</div>
+      <div class="prog-stat-label">Go</div>
+    </div>
+    <div class="prog-stat">
+      <div class="prog-stat-value" style="color:var(--amber)">${cgo}</div>
+      <div class="prog-stat-label">Conditional Go</div>
+    </div>
+    <div class="prog-stat">
+      <div class="prog-stat-value" style="color:var(--text-muted)">${pending}</div>
+      <div class="prog-stat-label">Pending</div>
+    </div>
+    <div class="prog-stat">
+      <div class="prog-stat-value" style="color:var(--gold)">${MILESTONES.length}</div>
+      <div class="prog-stat-label">Milestones</div>
+    </div>
+  `;
+
+  // Milestone cards
+  document.getElementById('milestones-grid').innerHTML = MILESTONES.map((ms, i) => {
+    const colour = ringColour(ms.pct, ms.gate);
+    return `
+      <div class="ms-card">
+        <div class="ring-wrap">
+          ${drawRing(ms.pct, colour, 90, 7)}
+          <div class="ring-center">
+            <div class="ring-pct" style="color:${colour}">${ms.pct}%</div>
+          </div>
+        </div>
+        <div class="ms-info">
+          <div class="ms-num">M${String(i + 1).padStart(2, '0')}</div>
+          <div class="ms-name">${ms.name}</div>
+          <div class="ms-date">${ms.date}</div>
+          <span class="ms-badge ${badgeClass(ms.gate)}">${badgeLabel(ms.gate)}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Animate all small rings after paint
+  setTimeout(() => {
+    document.querySelectorAll('[data-offset]').forEach(el => {
+      el.style.strokeDashoffset = el.dataset.offset;
+    });
+  }, 150);
+}
+
+render();
+</script>
+</body>
+</html>
