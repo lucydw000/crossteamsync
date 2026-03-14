@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVA — RACI Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #0a0a0f;
+    --surface:      #111118;
+    --surface2:     #16161f;
+    --border:       #1e1e2e;
+    --border-light: #2a2a3e;
+    --orange:       #ff7a45;
+    --orange2:      #c04e2c;
+    --orange-dim:   #1a0e06;
+    --text:         #ffffff;
+    --text-muted:   #ccccdd;
+    --text-dim:     #7777aa;
+    --green:        #3dd68c;
+    --green-dim:    #0d2e1f;
+    --amber:        #f5a623;
+    --amber-dim:    #2e1f0a;
+    --blue:         #5b8dee;
+    --blue-dim:     #0e1e3a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:14px;
+    min-height:100vh; padding-bottom:60px;
+  }
+
+  /* HEADER */
+  .header {
+    background:var(--surface);
+    border-bottom:3px solid var(--orange2);
+    padding:22px 40px;
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center;
+    justify-content:space-between; gap:20px; flex-wrap:wrap;
+  }
+  .header-label {
+    font-family:'DM Mono',monospace; font-size:10px;
+    color:var(--text-dim); letter-spacing:0.12em;
+    text-transform:uppercase; margin-bottom:5px;
+  }
+  .header-title { font-size:20px; font-weight:600; letter-spacing:-0.02em; }
+  .header-title span { color:var(--orange); }
+  .legend { display:flex; gap:6px; flex-wrap:wrap; }
+  .leg {
+    display:flex; align-items:center; gap:7px;
+    background:var(--surface2); border:1px solid var(--border-light);
+    border-radius:6px; padding:5px 11px;
+    font-size:12px; color:var(--text-muted); white-space:nowrap;
+  }
+  .lp {
+    width:20px; height:20px; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace; font-size:11px; font-weight:500;
+  }
+  .lR{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange2);}
+  .lA{background:var(--amber-dim); color:var(--amber); border:1px solid var(--amber);}
+  .lC{background:var(--blue-dim);  color:var(--blue);  border:1px solid var(--blue);}
+  .lI{background:var(--green-dim); color:var(--green); border:1px solid var(--green);}
+
+  /* MAIN */
+  .main { padding:28px 40px 0; }
+
+  /* WS BLOCK */
+  .ws-block {
+    margin-bottom:32px;
+    border:1px solid var(--border);
+    border-radius:10px; overflow:hidden;
+  }
+  .ws-bar {
+    display:flex; align-items:center; gap:12px;
+    padding:13px 20px; background:var(--surface);
+    border-bottom:1px solid var(--border);
+    cursor:pointer; user-select:none;
+  }
+  .ws-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .ws-name { font-size:14px; font-weight:600; flex:1; }
+  .ws-meta {
+    font-family:'DM Mono',monospace; font-size:10px;
+    padding:3px 8px; border-radius:4px; letter-spacing:0.05em;
+  }
+  .ws-chev { color:var(--text-dim); font-size:11px; transition:transform 0.2s; }
+  .ws-block.collapsed .ws-chev { transform:rotate(-90deg); }
+  .ws-block.collapsed .ws-body { display:none; }
+
+  /* TABLE */
+  .tbl-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; min-width:820px; }
+
+  thead th {
+    background:var(--surface2);
+    padding:10px 6px;
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:500;
+    color:var(--text-muted); letter-spacing:0.07em;
+    text-transform:uppercase; text-align:center;
+    border-bottom:1px solid var(--border);
+    border-right:1px solid var(--border);
+    white-space:nowrap; line-height:1.4;
+  }
+  thead th.act-col {
+    text-align:left; padding:10px 16px;
+    min-width:200px; width:230px;
+  }
+  thead th:last-child { border-right:none; }
+
+  tbody tr { border-bottom:1px solid var(--border); }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:not(.gate-row):hover td { background:var(--surface2) !important; }
+
+  tbody td {
+    padding:9px 6px; border-right:1px solid var(--border);
+    background:var(--bg); vertical-align:middle;
+  }
+  tbody td:last-child { border-right:none; }
+  td.act-col { padding:10px 16px; background:var(--bg); min-width:200px; }
+
+  .act-type {
+    font-family:'DM Mono',monospace; font-size:9px;
+    color:var(--text-dim); text-transform:uppercase;
+    letter-spacing:0.1em; margin-bottom:3px;
+  }
+  .act-name { font-size:12.5px; color:var(--text); line-height:1.35; }
+  .act-name.gate { color:var(--orange); font-weight:500; }
+
+  tr.gate-row td { background:var(--orange-dim) !important; border-top:1px solid #3a1a0a; border-bottom:1px solid #3a1a0a; }
+
+  /* PILL */
+  td.bc { text-align:center; }
+  .pill {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:5px;
+    font-family:'DM Mono',monospace; font-size:12px; font-weight:500;
+    cursor:default; transition:transform 0.1s; position:relative;
+  }
+  .pill:hover { transform:scale(1.2); z-index:10; }
+  .pill.R{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange2);}
+  .pill.A{background:var(--amber-dim); color:var(--amber); border:1px solid var(--amber);}
+  .pill.C{background:var(--blue-dim);  color:var(--blue);  border:1px solid var(--blue);}
+  .pill.I{background:var(--green-dim); color:var(--green); border:1px solid var(--green);}
+  .pill.x{color:var(--border-light); font-size:8px; border:none;}
+
+  /* TOOLTIP */
+  .tip { position:relative; display:inline-flex; }
+  .tip-box {
+    position:absolute; bottom:calc(100% + 6px); left:50%;
+    transform:translateX(-50%);
+    background:var(--surface2); border:1px solid var(--border-light);
+    color:var(--text); font-size:11px; padding:5px 10px;
+    border-radius:5px; white-space:nowrap;
+    pointer-events:none; opacity:0; transition:opacity 0.15s;
+    z-index:300; font-family:'DM Sans',sans-serif;
+  }
+  .tip:hover .tip-box { opacity:1; }
+
+  /* FOOTER */
+  .footer {
+    margin-top:36px; padding:16px 40px;
+    border-top:1px solid var(--border);
+    display:flex; align-items:center;
+    justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .footer span {
+    font-family:'DM Mono',monospace; font-size:10px;
+    color:var(--text-dim); letter-spacing:0.06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-label">SAVA Health · TPM Assignment · Jan–Jul 2025</div>
+    <div class="header-title">RACI Matrix — <span>Workstream Responsibilities</span></div>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="lp lR">R</div>Responsible — does the work</div>
+    <div class="leg"><div class="lp lA">A</div>Accountable — owns the outcome</div>
+    <div class="leg"><div class="lp lC">C</div>Consulted — input required</div>
+    <div class="leg"><div class="lp lI">I</div>Informed — kept updated</div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<div class="footer">
+  <span>SAVA Health · RACI · Programme Design 2025</span>
+  <span>Click any header to collapse · Hover pills for detail</span>
+</div>
+
+<script>
+const ROLES = [
+  { key:"mech",     label:"Head of\nMechanical" },
+  { key:"sse",      label:"Head of\nSSE" },
+  { key:"mfg",      label:"Head of\nManufacturing" },
+  { key:"bio",      label:"Head of\nBio & Chem" },
+  { key:"reg",      label:"Head of\nReg & Quality" },
+  { key:"clin",     label:"Head of\nClinical" },
+  
+  { key:"founders", label:"Co-founders" },
+];
+
+const WS = [
+  {
+    id:"mechanical", label:"Mechanical", color:"#5b8dee",
+    rows:[
+      [false,"DFM Review — Enclosure with CM",            ["R","_","C","_","_","_","I"]],
+      [false,"Thermal Management Validation",              ["R","C","_","_","_","_","_"]],
+      [false,"Final Enclosure Geometry Lock",              ["R","_","C","_","_","_","I"]],
+      [false,"IP67 Ingress Protection Testing",            ["R","_","_","_","C","_","_"]],
+      [false,"Mechanical Durability & Drop Testing",       ["R","_","_","_","C","_","_"]],
+      [false,"Biocompatibility Testing (ISO 10993)",       ["R","_","_","C","C","_","I"]],
+      [false,"Adhesion Patch & Wearability Validation",    ["R","_","_","C","C","I","_"]],
+      [false,"Tooling Design & Release to Manufacturer",   ["R","_","C","_","I","_","I"]],
+      [true, "🔒 Mechanical Design Freeze",                ["A","C","C","C","C","I","I"]],
+    ]
+  },
+  {
+    id:"sse", label:"Systems Software & Electronics", color:"#b07dea",
+    rows:[
+      [false,"BLE Stack Stability Resolution",             ["_","R","_","_","_","_","_"]],
+      [false,"Power Consumption Optimisation",             ["_","R","_","_","_","_","_"]],
+      [false,"App-Firmware Interface Specification Lock",  ["_","R","_","_","_","_","_"]],
+      [false,"PCB Layout Finalisation & Gerber Release",   ["C","R","C","_","_","_","_"]],
+      [false,"BLE Antenna Placement & Validation",         ["_","R","_","_","_","_","_"]],
+      [false,"PCB Supplier Qualification",                 ["_","R","C","_","I","_","_"]],
+      [false,"iOS & Android App Feature Completion",       ["_","R","_","_","_","C","I"]],
+      [false,"App Regression Test Suite Completion",       ["_","R","_","_","_","_","_"]],
+      [false,"Embedded Glucose Algorithm Finalisation",    ["_","R","_","C","_","_","I"]],
+      [false,"App Usability Study (Formative)",            ["_","R","_","_","_","C","I"]],
+      [false,"Cybersecurity Threat Assessment",            ["_","R","_","_","C","_","I"]],
+      [false,"IEC 62304 Software Lifecycle Documentation", ["_","R","_","_","C","_","_"]],
+      [true, "🔒 App Design Freeze",                       ["_","A","_","_","C","C","I"]],
+      [true, "🔒 Electronics & Firmware Design Freeze",    ["C","A","_","_","C","_","I"]],
+    ]
+  },
+  {
+    id:"manufacturing", label:"Manufacturing", color:"#f5a623",
+    rows:[
+      [false,"Component Lead Time & Supply Chain Review",  ["C","_","R","_","_","_","I"]],
+      [false,"Safety Stock Policy Implementation",         ["_","_","R","_","_","_","_"]],
+      [false,"CM Supplier Qualification Audit",            ["_","_","R","_","C","_","_"]],
+      [false,"Yield Improvement DOE",                      ["_","_","R","C","C","_","I"]],
+      [false,"Sensor Membrane Deposition Optimisation",    ["_","_","R","C","_","_","I"]],
+      [false,"Assembly Process Documentation & SOPs",      ["_","_","R","_","C","_","_"]],
+      [false,"Equipment Qualification (IQ/OQ)",            ["_","_","R","_","C","_","_"]],
+      [false,"Pilot Build #3 — 30 Unit Build",             ["C","C","R","C","C","I","I"]],
+      [true, "🔒 Manufacturing Pilot Build Complete",      ["C","C","A","C","C","C","I"]],
+    ]
+  },
+  {
+    id:"chemistry", label:"Biology & Chemistry", color:"#3dd68c",
+    rows:[
+      [false,"Enzyme Formulation Optimisation",            ["_","_","_","R","C","_","I"]],
+      [false,"Sensor Selectivity Testing vs Interferents", ["_","_","_","R","C","_","_"]],
+      [false,"Membrane Crosslinking Process Lock",         ["_","_","C","R","C","_","I"]],
+      [false,"Benchtop Accuracy Study (vs YSI)",           ["_","_","_","R","C","_","_"]],
+      [false,"Lot-to-Lot Variability Study",               ["_","_","C","R","C","_","I"]],
+      [false,"Raw Material Supplier Approval",             ["_","_","C","R","C","_","_"]],
+      [false,"14-Day Wear Stability Study",                ["_","_","_","R","C","I","I"]],
+      [false,"Accelerated Ageing & Shelf Life Study",      ["_","_","_","R","C","I","I"]],
+      [true, "🔒 Chemistry & Biology Design Freeze",       ["C","_","C","A","C","I","I"]],
+    ]
+  },
+  {
+    id:"regulatory", label:"Regulatory & Quality", color:"#ff7a45",
+    rows:[
+      [false,"CAPA Log Review & Closure",                  ["C","_","C","C","R","_","_"]],
+      [false,"Supplier Audit Programme",                   ["_","_","C","_","R","_","_"]],
+      [false,"Risk Management File (ISO 14971)",           ["C","C","C","C","R","_","I"]],
+      [false,"DHF Gap Analysis & Closure",                 ["C","C","C","C","R","_","I"]],
+      [false,"Regulatory Strategy Document (CE/FDA)",      ["_","_","_","_","R","_","C"]],
+      [false,"Essential Requirements / Perf. Checklist",   ["C","C","C","C","R","_","_"]],
+      [false,"Design Verification Plan Approval",          ["C","C","C","C","R","_","_"]],
+      [false,"Post-Market Surveillance Plan",              ["_","_","_","_","R","C","C"]],
+      [true, "🔒 DHF & Regulatory Readiness",              ["C","C","C","C","A","C","I"]],
+    ]
+  },
+  {
+    id:"clinical", label:"Clinical", color:"#f04f4f",
+    rows:[
+      [false,"CRO Selection & Contract Execution",         ["_","_","_","_","C","R","C"]],
+      [false,"Clinical Protocol Development",              ["_","C","_","C","C","R","C"]],
+      [false,"IRB / Ethics Committee Submission",          ["_","_","_","_","C","R","I"]],
+      [false,"CRF & Data Collection Tool Development",     ["_","C","_","_","C","R","_"]],
+      [false,"SAE Reporting & Pharmacovigilance",          ["_","_","_","_","C","R","I"]],
+      [false,"Site Selection & Initiation (Sites 1 & 2)",  ["_","_","_","_","_","R","I"]],
+      [false,"Investigator Training Programme",            ["_","_","_","_","_","R","I"]],
+      [false,"IP Labelling & Packaging for Trial",         ["_","_","C","_","C","R","I"]],
+      [true, "🔒 Clinical Trial Readiness",                ["_","_","C","_","C","A","C"]],
+    ]
+  },
+];
+
+const LABELS = { R:"Responsible", A:"Accountable", C:"Consulted", I:"Informed" };
+
+function pill(code, roleName) {
+  if (!code || code === "_") return `<div class="pill x">·</div>`;
+  return `<div class="tip"><div class="pill ${code}">${code}</div><div class="tip-box">${roleName}: ${LABELS[code]}</div></div>`;
+}
+
+function render(ws) {
+  const thCols = ROLES.map(r =>
+    `<th>${r.label.replace('\n','<br>')}</th>`
+  ).join('');
+
+  const rows = ws.rows.map(([isGate, name, roles]) => {
+    const cells = roles.map((r, i) =>
+      `<td class="bc">${pill(r, ROLES[i].label.replace('\n',' '))}</td>`
+    ).join('');
+    return `<tr class="${isGate?'gate-row':''}">
+      <td class="act-col">
+        <div class="act-type">${isGate?'GATE':'PROJECT'}</div>
+        <div class="act-name${isGate?' gate':''}">${name}</div>
+      </td>${cells}</tr>`;
+  }).join('');
+
+  const pc = ws.rows.filter(r=>!r[0]).length;
+  const gc = ws.rows.filter(r=>r[0]).length;
+
+  return `<div class="ws-block" id="ws-${ws.id}">
+    <div class="ws-bar" onclick="tog('ws-${ws.id}')">
+      <div class="ws-dot" style="background:${ws.color}"></div>
+      <div class="ws-name">${ws.label}</div>
+      <div class="ws-meta" style="background:${ws.color}18;color:${ws.color};border:1px solid ${ws.color}33">
+        ${pc} projects · ${gc} gate${gc!==1?'s':''}
+      </div>
+      <div class="ws-chev">▼</div>
+    </div>
+    <div class="ws-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th class="act-col">Activity</th>${thCols}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('main').innerHTML = WS.map(render).join('');
+function tog(id) { document.getElementById(id).classList.toggle('collapsed'); }
+</script>
+</body>
+</html>
